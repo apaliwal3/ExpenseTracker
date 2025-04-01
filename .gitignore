@@ -24,7 +24,11 @@ postgres-data/
 # IDE settings
 .vscode/
 .idea/
-.DS_Store
 
 # OS-specific
+.DS_Store
 Thumbs.db
+
+# Miscellaneous
+*.bak
+*.swp

@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: expense_tracker_db
+    restart: always
+    environment:
+      POSTGRES_USER: apaliwal
+      POSTGRES_PASSWORD: ase530kl
+      POSTGRES_DB: expensetracker
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
