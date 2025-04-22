@@ -1,22 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import ExpenseForm from './components/ExpenseForm';
 
 const App = () => {
   const [expenses, setExpenses] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:5001/api/expenses')
-      .then(response => setExpenses(response.data))
-      .catch(error => console.error(error));
+    const fetchExpenses = async() => {
+      try {
+        const res = await axios.get('http://localhost:5001/api/expenses');
+        console.log('Fetched expenses:', res.data);
+        setExpenses(res.data);
+
+        const uniqueCategories = [...new Set(res.data.map(e => e.category))];
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchExpenses();
   }, []);
+
+  const handleAddExpense = (newExpense) => {
+    setExpenses([newExpense, ...expenses]);
+
+    if (!categories.includes(newExpense.category)) {
+      setCategories([newExpense.category, ...categories]);
+    }
+  };
+
 
   return (
     <div>
       <h1>Expense Tracker</h1>
+      <ExpenseForm onAdd={handleAddExpense} />
+      <h2>Expenses</h2>
       <ul>
         {expenses.map(expense => (
           <li key={expense.id}>
-            {expense.category}: ${expense.amount} ({expense.description})
+            {expense.category}: ${expense.amount} ({expense.description || 'No description'})
           </li>
         ))}
       </ul>
