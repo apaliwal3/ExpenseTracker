@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import CreatableSelect from 'react-select/creatable'
 
-const ExpenseForm = ({onAdd, categories}) =>{
+const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [categoryOption, setCategoryOption] = useState(null);
@@ -10,19 +10,18 @@ const ExpenseForm = ({onAdd, categories}) =>{
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if(!amount || !categoryOption){
+    if (!amount || !categoryOption) {
       alert('Please fill in amount and category');
       return;
     }
 
-    try{
+    try {
       const category = categoryOption.value;
       const response = await axios.post('http://localhost:5001/api/expenses', {
         amount,
         description,
-        category
+        category,
       });
-      console.log(response.data);
       onAdd(response.data);
       setAmount('');
       setDescription('');
@@ -32,18 +31,24 @@ const ExpenseForm = ({onAdd, categories}) =>{
     }
   };
 
+  const handleCreateCategory = (inputValue) => {
+    const newOption = { value: inputValue, label: inputValue };
+    setCategoryOption(newOption);
+    onAddCategory(inputValue); // update category list in App
+  };
+
   const categoryOptions = (categories || []).map((cat) => ({
     value: cat,
     label: cat,
   }));
 
   return (
-    <form onSubmit={handleSubmit} style = {{marginBottom: '1rem'}}>
+    <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
       <input
-        type = 'number'
-        placeholder = 'Amount'
-        value = {amount}
-        onChange = {(e) => setAmount(e.target.value)}
+        type="number"
+        placeholder="Amount"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
         required
       />
       <CreatableSelect
@@ -52,15 +57,25 @@ const ExpenseForm = ({onAdd, categories}) =>{
         onChange={setCategoryOption}
         value={categoryOption}
         options={categoryOptions}
+        onCreateOption={handleCreateCategory}
       />
       <input
-        type = 'text'
-        placeholder = 'Description'
-        value = {description}
-        onChange = {(e) => setDescription(e.target.value)}
+        type="text"
+        placeholder="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       />
-      <button type = 'submit'>Add Expense</button>
-      <button type = 'button' onClick = {() => {setAmount(''); setDescription(''); setCategoryOption(null)}}>Clear</button>
+      <button type="submit">Add Expense</button>
+      <button
+        type="button"
+        onClick={() => {
+          setAmount('');
+          setDescription('');
+          setCategoryOption(null);
+        }}
+      >
+        Clear
+      </button>
     </form>
   );
 };
