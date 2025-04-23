@@ -23,6 +23,16 @@ const App = () => {
     fetchExpenses();
   }, []);
 
+  const handleDeleteExpense = async (id) => {
+    console.log("Deleting expense with id:", id);
+    try {
+        await axios.delete(`http://localhost:5001/api/expenses/${id}`)
+        setExpenses(expenses.filter(exp => exp.id !== id));
+    } catch (error) {
+       console.error('Failed to delete expense:', error);
+    }
+  };
+
   const handleAddExpense = (newExpense) => {
     setExpenses([newExpense, ...expenses]);
 
@@ -50,6 +60,9 @@ const App = () => {
         {expenses.map(expense => (
           <li key={expense.id}>
             {expense.category}: ${expense.amount} ({expense.description || 'No description'})
+            <button onClick={() => handleDeleteExpense(expense.id)} style={{ marginLeft: '1rem' }}>
+            Delete
+          </button>
           </li>
         ))}
       </ul>

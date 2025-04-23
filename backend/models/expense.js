@@ -13,4 +13,8 @@ async function addExpense(amount, category, description) {
   return rows[0];
 }
 
-module.exports = { getAllExpenses, addExpense };
+async function deleteExpense(id) {
+  await pool.query('DELETE FROM expenses WHERE id = $1', [id]);
+}
+
+module.exports = { getAllExpenses, addExpense, deleteExpense };
