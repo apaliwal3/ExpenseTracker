@@ -7,7 +7,7 @@ const App = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    const fetchExpenses = async() => {
+    const fetchExpenses = async () => {
       try {
         const res = await axios.get('http://localhost:5001/api/expenses');
         console.log('Fetched expenses:', res.data);
@@ -31,11 +31,20 @@ const App = () => {
     }
   };
 
+  const handleAddCategory = (newCategory) => {
+    if (!categories.includes(newCategory)) {
+      setCategories([newCategory, ...categories]);
+    }
+  };
 
   return (
     <div>
       <h1>Expense Tracker</h1>
-      <ExpenseForm onAdd={handleAddExpense} />
+      <ExpenseForm
+        onAdd={handleAddExpense}
+        categories={categories}
+        onAddCategory={handleAddCategory}
+      />
       <h2>Expenses</h2>
       <ul>
         {expenses.map(expense => (
