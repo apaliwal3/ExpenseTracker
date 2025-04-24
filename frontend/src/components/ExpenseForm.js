@@ -43,39 +43,58 @@ const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
   }));
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
-      <input
-        type="number"
-        placeholder="Amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        required
-      />
-      <CreatableSelect
-        placeholder="Select or create category"
-        isClearable
-        onChange={setCategoryOption}
-        value={categoryOption}
-        options={categoryOptions}
-        onCreateOption={handleCreateCategory}
-      />
-      <input
-        type="text"
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <button type="submit">Add Expense</button>
-      <button
-        type="button"
-        onClick={() => {
-          setAmount('');
-          setDescription('');
-          setCategoryOption(null);
-        }}
-      >
-        Clear
-      </button>
+    <form onSubmit={handleSubmit}>
+      <div className="mb-3">
+        <label className="form-label">Amount ($)</label>
+        <input
+          type="number"
+          className="form-control"
+          placeholder="Enter amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Category</label>
+        <CreatableSelect
+          placeholder="Select or create category"
+          isClearable
+          value={categoryOption}
+          onChange={setCategoryOption}
+          options={categoryOptions}
+          onCreateOption={handleCreateCategory}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Description</label>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Optional description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      <div className="d-flex justify-content-between">
+        <button className="btn btn-primary" type="submit">
+          Add Expense
+        </button>
+        <button
+          className="btn btn-outline-secondary"
+          type="button"
+          onClick={() => {
+            setAmount('');
+            setDescription('');
+            setCategoryOption(null);
+          }}
+        >
+          Clear
+        </button>
+      </div>
     </form>
   );
 };
