@@ -2,7 +2,7 @@ import React from 'react';
 
 const groupByKey = (arr, key) =>
   arr.reduce((acc, item) => {
-    const group = item[key] || 'Uncategorized';
+    const group = item[key] || 'Unspecified';
     if (!acc[group]) acc[group] = [];
     acc[group].push(item);
     return acc;

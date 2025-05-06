@@ -16,20 +16,20 @@ const App = () => {
   const [showFormModal, setShowFormModal] = useState(false);
 
   useEffect(() => {
-    const fetchExpenses = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get('http://localhost:5001/api/expenses');
-        console.log('Fetched expenses:', res.data);
-        setExpenses(res.data);
-
-        const uniqueCategories = [...new Set(res.data.map(e => e.category))];
-        setCategories(uniqueCategories);
+        const [expensesRes, categoriesRes] = await Promise.all([
+          axios.get('http://localhost:5001/api/expenses'),
+          axios.get('http://localhost:5001/api/expenses/categories')
+        ]);
+        setExpenses(expensesRes.data);
+        setCategories(categoriesRes.data.map(row => row)); // list of category names
       } catch (error) {
-        console.error(error);
+        console.error('Failed to fetch data:', error);
       }
     };
 
-    fetchExpenses();
+    fetchData();
   }, []);
 
   const handleDeleteExpense = async (id) => {
