@@ -14,15 +14,24 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { amount, category, description } = req.body;
-    if (!amount || !category) {
-      return res.status(400).json({ error: 'Amount and category are required' });
+    let { amount, category, description, user_id } = req.body;
+    console.log('Incoming expense POST body:', req.body);
+
+    amount = parseFloat(amount);
+    user_id = parseInt(user_id);
+
+    if (
+      amount === undefined || amount === null || isNaN(amount) ||
+      !category || category.trim() === '' ||
+      user_id === undefined || user_id === null || isNaN(user_id)
+    ) {
+      return res.status(400).json({ error: 'Amount, category and user_id are required' });
     }
 
-    const newExpense = await addExpense(amount, category, description);
+    const newExpense = await addExpense(amount, category, description, user_id);
     res.json(newExpense);
   } catch (err) {
-    console.error('Error adding expense:', err);
+    console.error('Error adding expense:', err.message);
     res.status(500).json({ error: 'Failed to add expense' });
   }
 });
@@ -36,6 +45,16 @@ router.get('/categories', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch categories' });
   }
 });
+
+router.get('/users', async (req, res) => {
+  try {
+    const {rows} = await pool.query('SELECT id, name FROM users ORDER BY name');
+    res.json(rows);
+  } catch (err) {
+    console.error('Failed to retrieve users:', err);
+    res.status(500).json({ error: 'Failed to retrieve users' })
+  }
+})
 
 router.delete('/:id', async (req, res) => {
   try {
