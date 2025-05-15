@@ -2,7 +2,16 @@ import React from 'react';
 
 const groupByKey = (arr, key) =>
   arr.reduce((acc, item) => {
-    const group = item[key] || 'Unspecified';
+    let group;
+
+    if (key === 'category') {
+      group = item.category || 'Uncategorized';
+    } else if (key === 'user') {
+      group = item.contributor || 'Unassigned';
+    } else {
+      group = 'Other';
+    }
+
     if (!acc[group]) acc[group] = [];
     acc[group].push(item);
     return acc;
@@ -24,11 +33,18 @@ const GroupedExpenses = ({ expenses, onDelete, groupBy, sortOption }) => {
           <h5 className="text-primary">{group}</h5>
           <div className="list-group">
             {items.map(exp => (
-              <div key={exp.id} className="list-group-item d-flex justify-content-between align-items-center">
+              <div
+                key={exp.id}
+                className="list-group-item d-flex justify-content-between align-items-center"
+              >
                 <div>
-                  <strong>${Number(exp.amount).toFixed(2)}</strong> – {exp.description || 'No description'}
+                  <strong>${Number(exp.amount).toFixed(2)}</strong> –{' '}
+                  {exp.description || 'No description'}
                 </div>
-                <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(exp.id)}>
+                <button
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => onDelete(exp.id)}
+                >
                   Delete
                 </button>
               </div>

@@ -4,26 +4,38 @@ import ExpenseForm from './components/ExpenseForm';
 import GroupedExpenses from './components/GroupedExpenses';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 
 const App = () => {
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]);
   const [sortOption, setSortOption] = useState('recent');
   const [groupBy, setGroupBy] = useState('category');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showFormModal, setShowFormModal] = useState(false);
 
+  const fetchExpenses = async () => {
+    try {
+      const res = await axios.get('http://localhost:5001/api/expenses');
+      setExpenses(res.data);
+    } catch (error) {
+      console.error('Failed to fetch expenses:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [expensesRes, categoriesRes] = await Promise.all([
+        const [expensesRes, categoriesRes, usersRes] = await Promise.all([
           axios.get('http://localhost:5001/api/expenses'),
-          axios.get('http://localhost:5001/api/expenses/categories')
+          axios.get('http://localhost:5001/api/expenses/categories'),
+          axios.get('http://localhost:5001/api/expenses/users'),
         ]);
         setExpenses(expensesRes.data);
-        setCategories(categoriesRes.data.map(row => row)); // list of category names
+        setCategories(categoriesRes.data.map(row => row));
+        setUsers(usersRes.data);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
@@ -33,20 +45,11 @@ const App = () => {
   }, []);
 
   const handleDeleteExpense = async (id) => {
-    console.log("Deleting expense with id:", id);
     try {
-        await axios.delete(`http://localhost:5001/api/expenses/${id}`)
-        setExpenses(expenses.filter(exp => exp.id !== id));
+      await axios.delete(`http://localhost:5001/api/expenses/${id}`);
+      setExpenses(expenses.filter(exp => exp.id !== id));
     } catch (error) {
-       console.error('Failed to delete expense:', error);
-    }
-  };
-
-  const handleAddExpense = (newExpense) => {
-    setExpenses([newExpense, ...expenses]);
-
-    if (!categories.includes(newExpense.category)) {
-      setCategories([newExpense.category, ...categories]);
+      console.error('Failed to delete expense:', error);
     }
   };
 
@@ -65,7 +68,6 @@ const App = () => {
     const date = new Date(exp.created_at);
     const start = startDate ? new Date(startDate) : null;
     const end = endDate ? new Date(endDate) : null;
-
     return (!start || date >= start) && (!end || date <= end);
   });
 
@@ -83,12 +85,13 @@ const App = () => {
         </Modal.Header>
         <Modal.Body>
           <ExpenseForm
-            onAdd={(expense) => {
-              handleAddExpense(expense);
-              setShowFormModal(false);
+            onAdd={async () => {
+              await fetchExpenses();        
+              setShowFormModal(false);       
             }}
             categories={categories}
             onAddCategory={handleAddCategory}
+            users={users}
           />
         </Modal.Body>
       </Modal>
@@ -142,7 +145,6 @@ const App = () => {
           </button>
         </div>
       </div>
-
 
       <GroupedExpenses
         expenses={filteredExpenses}

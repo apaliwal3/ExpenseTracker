@@ -1,18 +1,25 @@
 const pool = require('../src/db');
 
 async function getAllExpenses() {
-  const { rows } = await pool.query(`
-    SELECT 
-      expenses.id,
-      amount,
-      description,
-      categories.name AS category,
-      expenses.created_at
-    FROM expenses 
-    LEFT JOIN categories ON expenses.category_id = categories.id
-    ORDER BY expenses.created_at DESC
-  `);
-  return rows;
+  try {
+    const { rows } = await pool.query(`
+      SELECT 
+        expenses.id,
+        amount,
+        description,
+        categories.name AS category,
+        COALESCE(users.name, 'Unassigned') AS contributor,
+        expenses.created_at
+      FROM expenses
+      LEFT JOIN categories ON expenses.category_id = categories.id
+      LEFT JOIN users ON expenses.user_id = users.id
+      ORDER BY expenses.created_at DESC
+    `);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching expenses:", error);
+    throw error; // Let the route return 500 with context
+  }
 }
 
 async function getOrCreateCategoryId(categoryName) {
@@ -32,11 +39,11 @@ async function getOrCreateCategoryId(categoryName) {
   return inserted.rows[0].id;
 }
 
-async function addExpense(amount, categoryName, description) {
+async function addExpense(amount, categoryName, description, userId) {
   const categoryId = await getOrCreateCategoryId(categoryName);
   const { rows } = await pool.query(
-    'INSERT INTO expenses (amount, category_id, description) VALUES ($1, $2, $3) RETURNING *',
-    [amount, categoryId, description]
+    'INSERT INTO expenses (amount, category_id, description, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
+    [amount, categoryId, description, userId]
   );
   return rows[0];
 }

@@ -1,17 +1,24 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import CreatableSelect from 'react-select/creatable'
+import CreatableSelect from 'react-select/creatable';
 
-const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
+const ExpenseForm = ({ onAdd, categories, onAddCategory, users }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [categoryOption, setCategoryOption] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState('');
+
+  useEffect(() => {
+    if (users.length > 0) {
+      setSelectedUserId(users[0].id); // Default to first user
+    }
+  }, [users]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!amount || !categoryOption) {
-      alert('Please fill in amount and category');
+    if (!amount || !categoryOption || !selectedUserId) {
+      alert('Please fill in amount, category, and user');
       return;
     }
 
@@ -21,7 +28,9 @@ const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
         amount,
         description,
         category,
+        user_id: selectedUserId,
       });
+
       onAdd(response.data);
       setAmount('');
       setDescription('');
@@ -34,7 +43,7 @@ const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
   const handleCreateCategory = (inputValue) => {
     const newOption = { value: inputValue, label: inputValue };
     setCategoryOption(newOption);
-    onAddCategory(inputValue); // update category list in App
+    onAddCategory(inputValue);
   };
 
   const categoryOptions = (categories || []).map((cat) => ({
@@ -45,7 +54,7 @@ const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-3">
-        <label className="form-label">Amount ($)</label>
+        <label className="form-label">Amount</label>
         <input
           type="number"
           className="form-control"
@@ -79,6 +88,20 @@ const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
         />
       </div>
 
+      <div className="mb-3">
+        <label className="form-label">User</label>
+        <select
+          className="form-select"
+          value={selectedUserId}
+          onChange={(e) => setSelectedUserId(parseInt(e.target.value))}
+          required
+        >
+          {users.map(user => (
+            <option key={user.id} value={user.id}>{user.name}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="d-flex justify-content-between">
         <button className="btn btn-primary" type="submit">
           Add Expense
@@ -90,6 +113,7 @@ const ExpenseForm = ({ onAdd, categories, onAddCategory }) => {
             setAmount('');
             setDescription('');
             setCategoryOption(null);
+            setSelectedUserId(users[0]?.id || '');
           }}
         >
           Clear
