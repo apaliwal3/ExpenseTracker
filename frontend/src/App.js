@@ -5,6 +5,8 @@ import GroupedExpenses from './components/GroupedExpenses';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { Modal } from 'react-bootstrap';
+import Lottie from 'lottie-react';
+import checkAnimation from './assets/animations/check.json';
 
 const App = () => {
   const [expenses, setExpenses] = useState([]);
@@ -15,6 +17,7 @@ const App = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showFormModal, setShowFormModal] = useState(false);
+  const [showCheck, setShowCheck] = useState(false);
 
   const fetchExpenses = async () => {
     try {
@@ -86,8 +89,10 @@ const App = () => {
         <Modal.Body>
           <ExpenseForm
             onAdd={async () => {
-              await fetchExpenses();        
-              setShowFormModal(false);       
+              await fetchExpenses();
+              setShowFormModal(false);
+              setShowCheck(true); // 🎉 Trigger animation
+              setTimeout(() => setShowCheck(false), 2500); // Auto-hide
             }}
             categories={categories}
             onAddCategory={handleAddCategory}
@@ -152,6 +157,16 @@ const App = () => {
         groupBy={groupBy}
         sortOption={sortOption}
       />
+
+      {showCheck && (
+        <div className="check-overlay">
+          <Lottie
+            animationData={checkAnimation}
+            loop={false}
+            style={{ width: 200, height: 200 }}
+          />
+        </div>
+      )}
     </div>
   );
 };
