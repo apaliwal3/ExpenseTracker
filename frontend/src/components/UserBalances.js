@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../UserBalances.css';
+import '../styles/UserBalances.css';
 
 const UserBalances = () => {
   const [totals, setTotals] = useState([]);

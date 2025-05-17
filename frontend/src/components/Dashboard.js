@@ -5,7 +5,7 @@ import ExpenseForm from './ExpenseForm';
 import { Modal } from 'react-bootstrap';
 import Lottie from 'lottie-react';
 import checkAnimation from '../assets/animations/check.json';
-import '../Dashboard.css';
+import '../styles/Dashboard.css';
 
 const Dropdown = ({ label, options, selected, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
