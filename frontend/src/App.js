@@ -1,173 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import ExpenseForm from './components/ExpenseForm';
-import GroupedExpenses from './components/GroupedExpenses';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Dashboard from './components/Dashboard';
+import UserBalances from './components/UserBalances';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { Modal } from 'react-bootstrap';
-import Lottie from 'lottie-react';
-import checkAnimation from './assets/animations/check.json';
 
 const App = () => {
-  const [expenses, setExpenses] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [sortOption, setSortOption] = useState('recent');
-  const [groupBy, setGroupBy] = useState('category');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [showCheck, setShowCheck] = useState(false);
-
-  const fetchExpenses = async () => {
-    try {
-      const res = await axios.get('http://localhost:5001/api/expenses');
-      setExpenses(res.data);
-    } catch (error) {
-      console.error('Failed to fetch expenses:', error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [expensesRes, categoriesRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:5001/api/expenses'),
-          axios.get('http://localhost:5001/api/expenses/categories'),
-          axios.get('http://localhost:5001/api/expenses/users'),
-        ]);
-        setExpenses(expensesRes.data);
-        setCategories(categoriesRes.data.map(row => row));
-        setUsers(usersRes.data);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleDeleteExpense = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5001/api/expenses/${id}`);
-      setExpenses(expenses.filter(exp => exp.id !== id));
-    } catch (error) {
-      console.error('Failed to delete expense:', error);
-    }
-  };
-
-  const handleAddCategory = (newCategory) => {
-    if (!categories.includes(newCategory)) {
-      setCategories([newCategory, ...categories]);
-    }
-  };
-
-  const clearDateFilters = () => {
-    setStartDate('');
-    setEndDate('');
-  };
-
-  const filteredExpenses = expenses.filter(exp => {
-    const date = new Date(exp.created_at);
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(endDate) : null;
-    return (!start || date >= start) && (!end || date <= end);
-  });
-
   return (
-    <div className="container py-4">
-      <h1 className="mb-4">Expense Tracker</h1>
+    <Router>
+      <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
+        <nav className="d-flex justify-content-between align-items-center py-3 border-bottom">
+          <div className="fs-4 fw-bold">Expense Tracker</div>
+          <div>
+            <Link to="/" className="me-4 text-decoration-none text-dark">🏠 Home</Link>
+            <Link to="/balances" className="text-decoration-none text-dark">👤 User Balances</Link>
+          </div>
+          <div className="d-flex align-items-center">
+            <span className="me-2">Username</span>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#ccc' }}></div>
+          </div>
+        </nav>
 
-      <button className="btn btn-primary mb-4" onClick={() => setShowFormModal(true)}>
-        Add Expense
-      </button>
-
-      <Modal show={showFormModal} onHide={() => setShowFormModal(false)} centered size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Add Expense</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <ExpenseForm
-            onAdd={async () => {
-              await fetchExpenses();
-              setShowFormModal(false);
-              setShowCheck(true); // 🎉 Trigger animation
-              setTimeout(() => setShowCheck(false), 2500); // Auto-hide
-            }}
-            categories={categories}
-            onAddCategory={handleAddCategory}
-            users={users}
-          />
-        </Modal.Body>
-      </Modal>
-
-      <div className="row mb-3">
-        <div className="col-md-6">
-          <select
-            className="form-select"
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-          >
-            <option value="recent">Sort by: Most Recent</option>
-            <option value="amount_asc">Amount: Low to High</option>
-            <option value="amount_desc">Amount: High to Low</option>
-          </select>
-        </div>
-        <div className="col-md-6">
-          <select
-            className="form-select"
-            value={groupBy}
-            onChange={(e) => setGroupBy(e.target.value)}
-          >
-            <option value="category">Group by: Category</option>
-            <option value="user">Group by: Contributor</option>
-          </select>
-        </div>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/balances" element={<UserBalances />} />
+        </Routes>
       </div>
-
-      <div className="row mb-3">
-        <div className="col-md-6">
-          <label className="form-label">Start Date</label>
-          <input
-            type="date"
-            className="form-control"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </div>
-        <div className="col-md-6">
-          <label className="form-label">End Date</label>
-          <input
-            type="date"
-            className="form-control"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-        <div className="col-md-4 d-grid">
-          <button className="btn btn-outline-secondary mt-3" onClick={clearDateFilters}>
-            Clear Filters
-          </button>
-        </div>
-      </div>
-
-      <GroupedExpenses
-        expenses={filteredExpenses}
-        onDelete={handleDeleteExpense}
-        groupBy={groupBy}
-        sortOption={sortOption}
-      />
-
-      {showCheck && (
-        <div className="check-overlay">
-          <Lottie
-            animationData={checkAnimation}
-            loop={false}
-            style={{ width: 200, height: 200 }}
-          />
-        </div>
-      )}
-    </div>
+    </Router>
   );
 };
 

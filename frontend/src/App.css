@@ -62,3 +62,9 @@ body.modal-open {
   align-items: center;
   z-index: 9999;
 }
+
+h5 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
