@@ -7,7 +7,7 @@ import Lottie from 'lottie-react';
 import checkAnimation from '../assets/animations/check.json';
 import '../styles/Dashboard.css';
 
-const Dashboard = ({ settledExpenseIds }) => {
+const Dashboard = () => {
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
@@ -17,6 +17,7 @@ const Dashboard = ({ settledExpenseIds }) => {
   const [endDate, setEndDate] = useState('');
   const [showFormModal, setShowFormModal] = useState(false);
   const [showCheck, setShowCheck] = useState(false);
+  const [settledExpenseIds, setSettledExpenseIds] = useState(new Set());
 
   const fetchExpenses = async () => {
     try {
@@ -33,6 +34,15 @@ const Dashboard = ({ settledExpenseIds }) => {
       setCategories(res.data.map(row => row));
     } catch (err) {
       console.error('Failed to fetch categories:', err);
+    }
+  };
+
+  const fetchFullySettled = async () => {
+    try {
+      const res = await axios.get('http://localhost:5001/api/settlements/fully-settled');
+      setSettledExpenseIds(new Set(res.data));
+    } catch (err) {
+      console.error('Failed to fetch settled expenses:', err);
     }
   };
 
@@ -53,12 +63,14 @@ const Dashboard = ({ settledExpenseIds }) => {
     };
 
     fetchData();
+    fetchFullySettled();
   }, []);
 
   const handleDeleteExpense = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/api/expenses/${id}`);
       setExpenses(expenses.filter(exp => exp.id !== id));
+      fetchFullySettled();
     } catch (error) {
       console.error('Failed to delete expense:', error);
     }
@@ -133,6 +145,7 @@ const Dashboard = ({ settledExpenseIds }) => {
             onAdd={async () => {
               await fetchExpenses();
               await fetchCategories();
+              await fetchFullySettled();
               setShowFormModal(false);
               setShowCheck(true);
               setTimeout(() => setShowCheck(false), 2500);
