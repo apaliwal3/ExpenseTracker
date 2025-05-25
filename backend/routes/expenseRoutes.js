@@ -127,11 +127,25 @@ router.get('/shared-expenses/user-totals', async (req, res) => {
       WITH paid AS (
         SELECT paid_by AS user_id, SUM(amount) AS total_paid
         FROM shared_expenses
+        WHERE NOT EXISTS (
+          SELECT 1 FROM settled_debts sd
+          WHERE sd.expense_id = shared_expenses.expense_id
+            AND sd.owed_by = shared_expenses.owed_by
+            AND sd.paid_to = shared_expenses.paid_by
+            AND sd.amount = shared_expenses.amount
+        )
         GROUP BY paid_by
       ),
       owed AS (
         SELECT owed_by AS user_id, SUM(amount) AS total_owed
         FROM shared_expenses
+        WHERE NOT EXISTS (
+          SELECT 1 FROM settled_debts sd
+          WHERE sd.expense_id = shared_expenses.expense_id
+            AND sd.owed_by = shared_expenses.owed_by
+            AND sd.paid_to = shared_expenses.paid_by
+            AND sd.amount = shared_expenses.amount
+        )
         GROUP BY owed_by
       )
       SELECT
