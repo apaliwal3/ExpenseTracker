@@ -77,4 +77,23 @@ router.get('/suggestions', async (req, res) => {
   }
 });
 
+router.get('/fully-settled', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT se.expense_id
+      FROM shared_expenses se
+      GROUP BY se.expense_id
+      HAVING COUNT(*) = (
+        SELECT COUNT(*) FROM settled_debts sd
+        WHERE sd.expense_id = se.expense_id
+      )
+    `);
+    const ids = result.rows.map(r => r.expense_id);
+    res.json(ids);
+  } catch (err) {
+    console.error('Failed to fetch fully settled expense IDs:', err);
+    res.status(500).json({ error: 'Failed to fetch fully settled expenses' });
+  }
+});
+
 module.exports = router;
