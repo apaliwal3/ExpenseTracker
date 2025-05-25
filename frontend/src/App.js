@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import UserBalances from './components/UserBalances';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import axios from 'axios';
 
 const App = () => {
+  const [settledExpenseIds, setSettledExpenseIds] = useState(new Set());
+
+  useEffect(() => {
+    const fetchSettledExpenses = async () => {
+      try {
+        const res = await axios.get('http://localhost:5001/api/settlements');
+        const ids = new Set(res.data.map(r => r.expense_id));
+        setSettledExpenseIds(ids);
+      } catch (err) {
+        console.error('Failed to fetch settled expenses:', err);
+      }
+    };
+
+    fetchSettledExpenses();
+  }, []);
+
   return (
     <Router>
       <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
@@ -22,7 +39,7 @@ const App = () => {
         </nav>
 
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Dashboard settledExpenseIds={settledExpenseIds} />} />
           <Route path="/balances" element={<UserBalances />} />
         </Routes>
       </div>

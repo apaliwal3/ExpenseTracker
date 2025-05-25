@@ -17,7 +17,7 @@ const groupByKey = (arr, key) =>
     return acc;
   }, {});
 
-const GroupedExpenses = ({ expenses, onDelete, groupBy, sortOption }) => {
+const GroupedExpenses = ({ expenses, onDelete, groupBy, sortOption, settledExpenseIds = new Set() }) => {
   const sortedExpenses = [...expenses].sort((a, b) => {
     if (sortOption === 'amount_asc') return a.amount - b.amount;
     if (sortOption === 'amount_desc') return b.amount - a.amount;
@@ -38,7 +38,12 @@ const GroupedExpenses = ({ expenses, onDelete, groupBy, sortOption }) => {
                 className="d-flex justify-content-between align-items-center py-3 border-bottom"
               >
                 <div>
-                  <div className="fw-bold">${Number(exp.amount).toFixed(2)}</div>
+                  <div className="fw-bold">
+                    ${Number(exp.amount).toFixed(2)}{' '}
+                    {settledExpenseIds.has(exp.id) && (
+                      <span className="badge bg-success ms-2">Settled</span>
+                    )}
+                  </div>
                   <div className="text-muted small">{exp.description || 'No description'}</div>
                 </div>
 

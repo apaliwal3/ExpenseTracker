@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import GroupedExpenses from './GroupedExpenses';
 import ExpenseForm from './ExpenseForm';
@@ -7,57 +7,7 @@ import Lottie from 'lottie-react';
 import checkAnimation from '../assets/animations/check.json';
 import '../styles/Dashboard.css';
 
-const Dropdown = ({ label, options, selected, onSelect }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef();
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  return (
-    <div
-      className="dropdown-wrapper"
-      ref={containerRef}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
-      <label className="form-label d-block">{label}</label>
-      <div
-        className="custom-dropdown-toggle"
-        onClick={() => setIsOpen(prev => !prev)}
-      >
-        {options.find(o => o.value === selected)?.label || selected}
-        <span className="dropdown-arrow ms-2">▾</span>
-      </div>
-
-      {isOpen && (
-        <div className="dropdown-menu-box shadow-sm">
-          {options.map(opt => (
-            <div
-              key={opt.value}
-              className={`dropdown-item ${opt.value === selected ? 'active' : ''}`}
-              onClick={() => {
-                onSelect(opt.value);
-                setIsOpen(false);
-              }}
-            >
-              {opt.label}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const Dashboard = () => {
+const Dashboard = ({ settledExpenseIds }) => {
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
@@ -145,25 +95,21 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="d-flex gap-3">
-          <Dropdown
-            label="Group By"
-            selected={groupBy}
-            onSelect={setGroupBy}
-            options={[
-              { label: 'Category', value: 'category' },
-              { label: 'Contributor', value: 'user' }
-            ]}
-          />
-          <Dropdown
-            label="Sort By"
-            selected={sortOption}
-            onSelect={setSortOption}
-            options={[
-              { label: 'Most Recent', value: 'recent' },
-              { label: 'Amount: Low to High', value: 'amount_asc' },
-              { label: 'Amount: High to Low', value: 'amount_desc' }
-            ]}
-          />
+          <div>
+            <label className="form-label">Group By</label>
+            <select className="form-select custom-select" value={groupBy} onChange={e => setGroupBy(e.target.value)}>
+              <option value="category">Category</option>
+              <option value="user">Contributor</option>
+            </select>
+          </div>
+          <div>
+            <label className="form-label">Sort By</label>
+            <select className="form-select custom-select" value={sortOption} onChange={e => setSortOption(e.target.value)}>
+              <option value="recent">Most Recent</option>
+              <option value="amount_asc">Amount: Low to High</option>
+              <option value="amount_desc">Amount: High to Low</option>
+            </select>
+          </div>
         </div>
         <button className="btn btn-primary d-flex align-items-center px-4" onClick={() => setShowFormModal(true)}>
           Add <span className="ms-2 fs-4">+</span>
@@ -175,6 +121,7 @@ const Dashboard = () => {
         onDelete={handleDeleteExpense}
         groupBy={groupBy}
         sortOption={sortOption}
+        settledExpenseIds={settledExpenseIds}
       />
 
       <Modal show={showFormModal} onHide={() => setShowFormModal(false)} centered size="lg">
