@@ -14,6 +14,8 @@ app.use('/api/expenses', expenseRoutes);
 const settlementsRoutes = require('./routes/settlementsRoutes');
 app.use('/api/settlements', settlementsRoutes);
 
+const userRoutes = require('./routes/userRoutes');
+app.use('/api', userRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT,'0.0.0.0', () => {

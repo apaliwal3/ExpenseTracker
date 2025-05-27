@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import UserBalances from './components/UserBalances';
+import MySpending from './components/MySpending';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -15,6 +16,7 @@ const App = () => {
           <div>
             <Link to="/" className="me-4 text-decoration-none text-dark">🏠 Home</Link>
             <Link to="/balances" className="text-decoration-none text-dark">👤 User Balances</Link>
+            <Link to="/my-spending" className="ms-4 text-decoration-none text-dark">💰 My Spending</Link>
           </div>
           <div className="d-flex align-items-center">
             <span className="me-2">Username</span>
@@ -25,6 +27,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/balances" element={<UserBalances />} />
+          <Route path="/my-spending" element={<MySpending />} />
         </Routes>
       </div>
     </Router>
