@@ -1,0 +1,42 @@
+.myspending-summary .card {
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.myspending-summary .card h5,
+.myspending-summary .card h6 {
+  margin-bottom: 0.25rem;
+}
+
+.myspending-summary .card.bg-primary {
+  color: #fff;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.table td .badge {
+  font-size: 0.8rem;
+  padding: 0.35em 0.6em;
+}
+
+.table td button {
+  padding: 0.25rem 0.5rem;
+}
+
+.myspending-title {
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.myspending-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.myspending-modal .modal-body p {
+  margin-bottom: 0.5rem;
+}
