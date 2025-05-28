@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {Modal, Button} from 'react-bootstrap';
 import '../styles/MySpending.css';
+import { TbAlertCircleFilled } from "react-icons/tb";
 
 const MySpending = ({userId = 1}) => {
   const [summary, setSummary] = useState([]);
@@ -96,10 +97,10 @@ const MySpending = ({userId = 1}) => {
                 </td>
                 <td>
                   <button
-                    className="btn btn-sm btn-outline-dark"
+                    className="btn btn-sm btn-outline-none"
                     onClick={() => setSelectedTransaction(txn)}
                   >
-                    ℹ️
+                    <TbAlertCircleFilled size={25} />
                   </button>
                 </td>
               </tr>
