@@ -92,22 +92,26 @@ router.delete('/categories/:name', async (req, res) => {
 });
 
 router.post('/shared-expenses', async (req, res) => {
-  const { expense_id, paid_by, shared_with } = req.body;
+  const { expense_id, paid_by, participants } = req.body;
 
-  if (!expense_id || !paid_by || !Array.isArray(shared_with) || shared_with.length === 0) {
+  if (!expense_id || !paid_by || !Array.isArray(participants) || participants.length < 1) {
     return res.status(400).json({ error: 'Invalid shared expense payload' });
   }
 
+  const splitAmount = parseFloat((req.body.amount / participants.length).toFixed(2));
   const client = await pool.connect();
+
   try {
     await client.query('BEGIN');
 
-    for (const { owed_by, amount } of shared_with) {
-      await client.query(
-        `INSERT INTO shared_expenses (expense_id, paid_by, owed_by, amount)
-         VALUES ($1, $2, $3, $4)`,
-        [expense_id, paid_by, owed_by, amount]
-      );
+    for (const uid of participants) {
+      if (uid !== paid_by) {
+        await client.query(
+          `INSERT INTO shared_expenses (expense_id, paid_by, owed_by, amount)
+           VALUES ($1, $2, $3, $4)`,
+          [expense_id, paid_by, uid, splitAmount]
+        );
+      }
     }
 
     await client.query('COMMIT');

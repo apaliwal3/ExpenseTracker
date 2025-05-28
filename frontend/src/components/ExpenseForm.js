@@ -9,7 +9,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
   const [categoryOption, setCategoryOption] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [isShared, setIsShared] = useState(false);
-  const [sharedWith, setSharedWith] = useState([]);
+  const [participants, setParticipants] = useState([]);
 
   useEffect(() => {
     if (users.length > 0) {
@@ -26,14 +26,15 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
     }
 
     const numericAmount = parseFloat(amount);
-    if (isShared && sharedWith.length === 0) {
-      alert('Please select at least one user to share with.');
+    if (isShared && participants.length === 0) {
+      alert('Please select at least one participant');
       return;
     }
 
     try {
-      // Step 1: create expense
       const category = categoryOption.value;
+
+      // Step 1: create expense
       const expenseRes = await axios.post('http://localhost:5001/api/expenses', {
         amount: numericAmount,
         description,
@@ -43,19 +44,24 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
 
       const expense = expenseRes.data;
 
-      // Step 2: shared logic (if applicable)
+      // Step 2: share if applicable
       if (isShared) {
-        const perUserShare = parseFloat((numericAmount / sharedWith.length).toFixed(2));
+        const participantIds = participants.map(p => parseInt(p.value));
+        const totalPeople = participantIds.length;
+        const splitAmount = parseFloat((numericAmount / totalPeople).toFixed(2));
 
-        const sharedEntries = sharedWith.map(user => ({
-          owed_by: user.value,
-          amount: perUserShare,
-        }));
+        const sharedEntries = participantIds
+          .filter(uid => uid !== selectedUserId) // don't owe yourself
+          .map(uid => ({
+            owed_by: uid,
+            amount: splitAmount,
+          }));
 
         await axios.post('http://localhost:5001/api/expenses/shared-expenses', {
           expense_id: expense.id,
           paid_by: selectedUserId,
-          shared_with: sharedEntries,
+          participants: participantIds,
+          amount: numericAmount
         });
       }
 
@@ -63,7 +69,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
       setAmount('');
       setDescription('');
       setCategoryOption(null);
-      setSharedWith([]);
+      setParticipants([]);
       setIsShared(false);
     } catch (error) {
       console.error('Error adding expense:', error);
@@ -74,7 +80,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
   const handleCreateCategory = (inputValue) => {
     const newOption = { value: inputValue, label: inputValue };
     setCategoryOption(newOption);
-    fetchCategories(); // Refresh categories
+    fetchCategories();
   };
 
   const handleDeleteCategory = async () => {
@@ -181,13 +187,13 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
 
       {isShared && (
         <div className="mb-3">
-          <label className="form-label">Split With</label>
+          <label className="form-label">Participants (including yourself)</label>
           <Select
             isMulti
-            options={userOptions.filter(u => u.value !== selectedUserId)}
-            value={sharedWith}
-            onChange={setSharedWith}
-            placeholder="Select users to split with"
+            options={userOptions}
+            value={participants}
+            onChange={setParticipants}
+            placeholder="Select all users involved"
           />
         </div>
       )}
@@ -203,7 +209,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
             setAmount('');
             setDescription('');
             setCategoryOption(null);
-            setSharedWith([]);
+            setParticipants([]);
             setIsShared(false);
             setSelectedUserId(users[0]?.id || '');
           }}
