@@ -1,16 +1,43 @@
 .myspending-summary .card {
-  border: none;
+  min-height: 150px;
+  height: 150px;
+  width: 320px;
+  max-width: 100%;
   border-radius: 12px;
-  padding: 1rem;
+  padding: 16px;
+  background-color: #d4d5d5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  border: none;
+}
+
+.summary-card {
+  height: 150px;
+  width: 320px;
+  max-width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+  border: none;
 }
 
 .myspending-summary .card h5,
+.myspending-summary .card h4,
+.myspending-summary .card h1,
 .myspending-summary .card h6 {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
 }
 
 .myspending-summary .card.bg-primary {
-  color: #fff;
+  color: #fafafa;
 }
 
 .table th,
@@ -39,4 +66,19 @@
 
 .myspending-modal .modal-body p {
   margin-bottom: 0.5rem;
+}
+
+.summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .summary-card {
+    height: auto;
+    width: 100%;
+  }
 }

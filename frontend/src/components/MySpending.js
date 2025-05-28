@@ -35,32 +35,22 @@ const MySpending = ({userId = 1}) => {
     <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
       <h2 className="mb-4">Hello Username!</h2>
 
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="card text-white bg-primary shadow">
-            <div className="card-body">
-              <h5 className="card-title">Net Outflow</h5>
-              <h2 className="fw-bold">${netOutflow}</h2>
-            </div>
-          </div>
+      <div className="summary-row myspending-summary">
+        <div className="summary-card bg-primary text-white">
+          <h4 className="card-title">Net Outflow</h4>
+          <h1 className="fw-bold">${netOutflow}</h1>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow">
-            <div className="card-body">
-              <h5 className="text-primary fw-bold">{topCategory}</h5>
-              <p className="mb-0">is your top category this month</p>
-            </div>
-          </div>
+
+        <div className="summary-card bg-light">
+          <h1 className="text-primary fw-bold">{topCategory}</h1>
+          <p className="mb-0">is your top category this month</p>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow">
-            <div className="card-body">
-              <h6 className="text-primary">Shared Paid:</h6>
-              <h5 className="fw-bold">${sharedPaid}</h5>
-              <h6 className="text-primary mt-3">Reimbursed:</h6>
-              <h5 className="fw-bold">${reimbursed}</h5>
-            </div>
-          </div>
+
+        <div className="summary-card bg-light">
+          <h5 className="text-primary">Shared Paid:</h5>
+          <h5 className="fw-bold">${sharedPaid}</h5>
+          <h5 className="text-primary mt-2">Reimbursed:</h5>
+          <h5 className="fw-bold">${reimbursed}</h5>
         </div>
       </div>
 
