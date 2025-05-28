@@ -129,8 +129,7 @@ router.get('/users/:userId/spending', async (req, res) => {
       total_reimbursed: parseFloat(reimbursedRes.rows[0].total_reimbursed),
       total_owed: parseFloat(owedRes.rows[0].total_owed),
       net_spent:
-        parseFloat(personalRes.rows[0].total_paid) +
-        parseFloat(sharedPaidRes.rows[0].total_shared_paid) -
+        parseFloat(personalRes.rows[0].total_paid) -
         parseFloat(reimbursedRes.rows[0].total_reimbursed),
       top_category: topCategoryRes.rows[0]?.name || null,
       transactions
