@@ -17,6 +17,20 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
     }
   }, [users]);
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (description && !categoryOption) {
+        axios.post('http://localhost:5001/api/expenses/classify', { description })
+          .then(res => {
+            const predicted = res.data.category;
+            setCategoryOption({ label: predicted, value: predicted });
+          })
+          .catch(err => console.error('Failed to classify category:', err));
+      }
+    }, 800);
+    return () => clearTimeout(delayDebounceFn);
+  }, [description]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
