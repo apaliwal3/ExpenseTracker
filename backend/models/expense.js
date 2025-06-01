@@ -1,4 +1,5 @@
 const pool = require('../src/db');
+const axios = require('axios');
 
 async function getAllExpenses() {
   try {
@@ -39,7 +40,24 @@ async function getOrCreateCategoryId(categoryName) {
   return inserted.rows[0].id;
 }
 
+async function getPredictedCategory(description) {
+  try {
+    const res = await axios.post('http://127.0.0.1:5002/predict-category', { description });
+    return res.data.category;
+  } catch (err) {
+    console.error('Prediction failed:', err.message);
+    return null;
+  }
+}
+
 async function addExpense(amount, categoryName, description, userId) {
+  if (!categoryName || categoryName.trim() === '') {
+    categoryName = await getPredictedCategory(description);
+    if (!categoryName) {
+      throw new Error('Failed to predict category and no category provided.');
+    }
+  }
+
   const categoryId = await getOrCreateCategoryId(categoryName);
   const { rows } = await pool.query(
     'INSERT INTO expenses (amount, category_id, description, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
@@ -55,4 +73,4 @@ async function deleteExpense(id) {
   }
 }
 
-module.exports = { getAllExpenses, addExpense, deleteExpense };
+module.exports = { getAllExpenses, addExpense, deleteExpense, getPredictedCategory };

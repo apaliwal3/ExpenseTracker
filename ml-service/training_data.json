@@ -1,0 +1,212 @@
+[
+  { "description": "Uber ride to office", "category": "Transportation" },
+  { "description": "Dinner at Olive Garden", "category": "Dining" },
+  { "description": "Starbucks coffee", "category": "Dining" },
+  { "description": "Groceries from Walmart", "category": "Groceries" },
+  { "description": "Netflix subscription", "category": "Entertainment" },
+  { "description": "Bus ticket", "category": "Transportation" },
+  { "description": "Lunch at McDonald's", "category": "Dining" },
+  { "description": "Soap", "category": "Household" },
+  { "description": "Drinks at Monday's", "category": "Bars" },
+  { "description": "Gas", "category": "Utilities" },
+  { "description": "Snacks from 7-Eleven", "category": "Groceries" },
+  { "description": "Naf-Naf lunch", "category": "Dining" },
+  { "description": "Flight to Chicago", "category": "Travel" },
+  { "description": "Concert tickets", "category": "Entertainment" },
+  { "description": "Taxi to airport", "category": "Transportation" },
+  { "description": "Drinks at Whiskeys", "category": "Bars" },
+  { "description": "Movie Tickets", "category": "Entertainment" },
+  { "description": "Eggs", "category": "Groceries" },
+  { "description": "Bread", "category": "Groceries" },
+  { "description": "Milk", "category": "Groceries" },
+  { "description": "Paper towels", "category": "Household" },
+  { "description": "Drinks at Tap-tap", "category": "Bars" },
+  { "description": "Drinks at Chasers", "category": "Bars" },
+  
+  { "description": "Electricity bill", "category": "Utilities" },
+  { "description": "Water bill", "category": "Utilities" },
+  { "description": "Internet service", "category": "Utilities" },
+  { "description": "Dinner at Chipotle", "category": "Dining" },
+  { "description": "Lyft ride to downtown", "category": "Transportation" },
+  { "description": "Train ticket to Milwaukee", "category": "Transportation" },
+  { "description": "Burger King lunch", "category": "Dining" },
+  { "description": "Cleaning supplies", "category": "Household" },
+  { "description": "Drinks at The Edgewater", "category": "Bars" },
+  { "description": "Toilet paper", "category": "Household" },
+  { "description": "Spotify subscription", "category": "Entertainment" },
+  { "description": "Flight to NYC", "category": "Travel" },
+  { "description": "Broadway musical tickets", "category": "Entertainment" },
+  { "description": "Gas refill", "category": "Utilities" },
+  { "description": "Laundry detergent", "category": "Household" },
+  { "description": "Lunch at Culver's", "category": "Dining" },
+  { "description": "Late night drinks at Vintage", "category": "Bars" },
+  { "description": "Breakfast at Panera", "category": "Dining" },
+  { "description": "Frozen pizza", "category": "Groceries" },
+  { "description": "Bag of rice", "category": "Groceries" },
+  { "description": "Car ride to airport", "category": "Transportation" },
+  { "description": "Plane ticket to Boston", "category": "Travel" },
+  { "description": "Festival pass", "category": "Entertainment" },
+  { "description": "Mini bar charge", "category": "Bars" },
+  { "description": "Bus fare", "category": "Transportation" },
+  {
+    "description": "Monthly electricity bill",
+    "category": "Utilities"
+  },
+  {
+    "description": "Water utility payment",
+    "category": "Utilities"
+  },
+  {
+    "description": "Internet service charge",
+    "category": "Utilities"
+  },
+  {
+    "description": "Gas bill payment",
+    "category": "Utilities"
+  },
+  {
+    "description": "Electric company payment",
+    "category": "Utilities"
+  },
+  {
+    "description": "Phone bill",
+    "category": "Utilities"
+  },
+  {
+    "description": "Utility bill for March",
+    "category": "Utilities"
+  },
+  {
+    "description": "AT&T internet bill",
+    "category": "Utilities"
+  },
+  {
+    "description": "Cable TV subscription",
+    "category": "Utilities"
+  },
+  {
+    "description": "Water supply bill",
+    "category": "Utilities"
+  },
+
+  {
+    "description": "Uber from airport",
+    "category": "Transportation"
+  },
+  {
+    "description": "Cab ride downtown",
+    "category": "Transportation"
+  },
+  {
+    "description": "Train fare",
+    "category": "Transportation"
+  },
+  {
+    "description": "Taxi to office",
+    "category": "Transportation"
+  },
+  {
+    "description": "Lyft ride to party",
+    "category": "Transportation"
+  },
+  {
+    "description": "Rental scooter",
+    "category": "Transportation"
+  },
+  {
+    "description": "Bus fare",
+    "category": "Transportation"
+  },
+  {
+    "description": "Uber pool ride",
+    "category": "Transportation"
+  },
+  {
+    "description": "Subway ticket",
+    "category": "Transportation"
+  },
+  {
+    "description": "Commute expenses",
+    "category": "Transportation"
+  },
+
+  {
+    "description": "Flight to New York",
+    "category": "Travel"
+  },
+  {
+    "description": "Hotel stay in Miami",
+    "category": "Travel"
+  },
+  {
+    "description": "Car rental for vacation",
+    "category": "Travel"
+  },
+  {
+    "description": "Airbnb booking",
+    "category": "Travel"
+  },
+  {
+    "description": "Train to Chicago",
+    "category": "Travel"
+  },
+  {
+    "description": "Vacation to Florida",
+    "category": "Travel"
+  },
+  {
+    "description": "Plane tickets to Seattle",
+    "category": "Travel"
+  },
+  {
+    "description": "Luggage fee",
+    "category": "Travel"
+  },
+  {
+    "description": "Hotel reservation",
+    "category": "Travel"
+  },
+  {
+    "description": "Flight change fee",
+    "category": "Travel"
+  },
+  { "description": "Uber ride to office", "category": "Transportation" },
+  { "description": "Dinner at Olive Garden", "category": "Dining" },
+  { "description": "Starbucks coffee", "category": "Dining" },
+  { "description": "Groceries from Walmart", "category": "Groceries" },
+  { "description": "Netflix subscription", "category": "Entertainment" },
+  { "description": "Bus ticket", "category": "Transportation" },
+  { "description": "Lunch at McDonald's", "category": "Dining" },
+  { "description": "Soap", "category": "Household" },
+  { "description": "Drinks at Monday's", "category": "Bars" },
+  { "description": "Gas", "category": "Utilities" },
+  { "description": "Snacks from 7-Eleven", "category": "Groceries" },
+  { "description": "Naf-Naf lunch", "category": "Dining" },
+  { "description": "Flight to Chicago", "category": "Travel" },
+  { "description": "Concert tickets", "category": "Entertainment" },
+  { "description": "Taxi to airport", "category": "Transportation" },
+  { "description": "Drinks at Whiskeys", "category": "Bars" },
+  { "description": "Movie Tickets", "category": "Entertainment" },
+  { "description": "Eggs", "category": "Groceries" },
+  { "description": "Bread", "category": "Groceries" },
+  { "description": "Milk", "category": "Groceries" },
+  { "description": "Paper towels", "category": "Household" },
+  { "description": "Drinks at Tap-tap", "category": "Bars" },
+  { "description": "Drinks at Chasers", "category": "Bars" },
+  { "description": "Streaming Hulu", "category": "Entertainment" },
+  { "description": "Toilet paper", "category": "Household" },
+  { "description": "Window cleaner", "category": "Household" },
+  { "description": "Cleaning wipes", "category": "Household" },
+  { "description": "Kitchen sponge", "category": "Household" },
+  { "description": "Amazon groceries order", "category": "Groceries" },
+  { "description": "Apples and bananas", "category": "Groceries" },
+  { "description": "Frozen meals from Trader Joe's", "category": "Groceries" },
+  { "description": "Shampoo", "category": "Household" },
+  { "description": "Household bleach", "category": "Household" },
+  { "description": "Electricity bill", "category": "Utilities" },
+  { "description": "Water utility payment", "category": "Utilities" },
+  { "description": "Disney+ subscription", "category": "Entertainment" },
+  { "description": "HBO Max", "category": "Entertainment" },
+  { "description": "Popcorn at cinema", "category": "Entertainment" },
+  { "description": "Video game purchase", "category": "Entertainment" }
+]

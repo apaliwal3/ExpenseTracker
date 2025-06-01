@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllExpenses, addExpense, deleteExpense } = require('../models/expense');
+const { getAllExpenses, addExpense, deleteExpense, getPredictedCategory } = require('../models/expense');
 const pool = require('../src/db');
 
 router.get('/', async (req, res) => {
@@ -35,6 +35,22 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to add expense' });
   }
 });
+
+router.post('/classify', async (req, res) => {
+  const { description } = req.body;
+  if (!description) {
+    return res.status(400).json({ error: 'Missing description' });
+  }
+
+  try {
+    const result = await getPredictedCategory(description);
+    res.json({ category: result });
+  } catch (err) {
+    console.error('Category prediction failed:', err);
+    res.status(500).json({ error: 'Prediction failed' });
+  }
+});
+
 
 router.get('/categories', async (req, res) => {
   try {
