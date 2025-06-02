@@ -141,7 +141,7 @@ router.get('/users/:userId/spending', async (req, res) => {
   }
 });
 
-router.get('users/:userId/spendingTrends', async (req, res) => {
+router.get('/users/:userId/spending-trends', async (req, res) => {
   const userId = parseInt(req.params.userId);
 
   if (isNaN(userId)){
@@ -152,7 +152,7 @@ router.get('users/:userId/spendingTrends', async (req, res) => {
     const {rows} = await pool.query(`
       SELECT
         c.name AS category,
-        TO_CHAR('month', e.created_at) AS month,
+        TO_CHAR(e.created_at, 'YYYY-MM') AS month,
         SUM(e.amount) AS total
       FROM expenses e
       JOIN categories c ON e.category_id = c.id
