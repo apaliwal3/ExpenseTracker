@@ -16,7 +16,7 @@ const App = () => {
           <div>
             <Link to="/" className="me-4 text-decoration-none text-dark">🏠 My Dashboard</Link>
             <Link to="/balances" className="text-decoration-none text-dark">👤 User Balances</Link>
-            <Link to="/group-spending" className="ms-4 text-decoration-none text-dark">💰 Group Spending</Link>
+            <Link to="/group-spending" className="ms-4 text-decoration-none text-dark">💰 All Spending</Link>
           </div>
           <div className="d-flex align-items-center">
             <span className="me-2">Username</span>
