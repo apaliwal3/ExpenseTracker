@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Dashboard from './components/Dashboard';
+import GroupSpending from './components/GroupSpending';
 import UserBalances from './components/UserBalances';
 import MySpending from './components/MySpending';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -14,9 +14,9 @@ const App = () => {
         <nav className="d-flex justify-content-between align-items-center py-3 border-bottom">
           <div className="fs-4 fw-bold">Expense Tracker</div>
           <div>
-            <Link to="/" className="me-4 text-decoration-none text-dark">🏠 Home</Link>
+            <Link to="/" className="me-4 text-decoration-none text-dark">🏠 My Dashboard</Link>
             <Link to="/balances" className="text-decoration-none text-dark">👤 User Balances</Link>
-            <Link to="/my-spending" className="ms-4 text-decoration-none text-dark">💰 My Spending</Link>
+            <Link to="/group-spending" className="ms-4 text-decoration-none text-dark">💰 Group Spending</Link>
           </div>
           <div className="d-flex align-items-center">
             <span className="me-2">Username</span>
@@ -25,9 +25,9 @@ const App = () => {
         </nav>
 
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<MySpending />} />
           <Route path="/balances" element={<UserBalances />} />
-          <Route path="/my-spending" element={<MySpending />} />
+          <Route path="/group-spending" element={<GroupSpending />} />
         </Routes>
       </div>
     </Router>

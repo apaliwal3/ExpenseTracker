@@ -141,4 +141,40 @@ router.get('/users/:userId/spending', async (req, res) => {
   }
 });
 
+router.get('users/:userId/spendingTrends', async (req, res) => {
+  const userId = parseInt(req.params.userId);
+
+  if (isNaN(userId)){
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+
+  try {
+    const {rows} = await pool.query(`
+      SELECT
+        c.name AS category,
+        TO_CHAR('month', e.created_at) AS month,
+        SUM(e.amount) AS total
+      FROM expenses e
+      JOIN categories c ON e.category_id = c.id
+      WHERE e.user_id = $1
+      GROUP BY c.name, month
+      ORDER BY month
+    `, [userId]);
+
+    const trends = {};
+    rows.forEach(row => {
+      if (!trends[row.category]) trends[row.category] = [];
+      trends[row.category].push({
+        month: row.month,
+        amount: parseFloat(row.total),
+      });
+    });
+
+    res.json(trends);
+  } catch (err) { 
+    console.error('Failed to fetch spending trends:', err);
+    res.status(500).json({ error: 'Failed to fetch spending trends' });
+  }
+});  
+
 module.exports = router;

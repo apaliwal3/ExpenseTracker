@@ -5,9 +5,9 @@ import ExpenseForm from './ExpenseForm';
 import { Modal } from 'react-bootstrap';
 import Lottie from 'lottie-react';
 import checkAnimation from '../assets/animations/check.json';
-import '../styles/Dashboard.css';
+import '../styles/GroupSpending.css';
 
-const Dashboard = () => {
+const GroupSpending = () => {
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
@@ -170,4 +170,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default GroupSpending;
