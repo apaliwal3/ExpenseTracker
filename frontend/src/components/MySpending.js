@@ -3,12 +3,14 @@ import axios from 'axios';
 import {Modal, Button} from 'react-bootstrap';
 import '../styles/MySpending.css';
 import { TbAlertCircleFilled } from "react-icons/tb";
+import SpendingTrendsChart from './SpendingTrendsChart';
 
 const MySpending = ({userId = 1}) => {
   const [summary, setSummary] = useState([]);
   const [showAllModal, setShowAllModal] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [trendData, setTrendData] = useState({});
 
   useEffect(() => {
     const fetchSpending = async () => {
@@ -30,6 +32,18 @@ const MySpending = ({userId = 1}) => {
   const reimbursed = summary.total_reimbursed?.toFixed(2) || 0.00;
 
   const preview = transactions.slice(0, 5);
+
+  useEffect(() => {
+    const fetchTrends = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/api/users/${userId}/spending-trends`);
+        setTrendData(res.data);
+      } catch (err) {
+        console.error('Failed to fetch trend data:', err);
+      }
+    };
+    fetchTrends();
+  }, [userId]);
 
   return (
     <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
@@ -53,6 +67,13 @@ const MySpending = ({userId = 1}) => {
           <h5 className="fw-bold">${reimbursed}</h5>
         </div>
       </div>
+
+      {Object.keys(trendData).length > 0 && (
+        <div className="insights-grid">
+          <SpendingTrendsChart trends={trendData} />
+          {/* Add more <div className="insight-card"> for other insights later */}
+        </div>
+      )}
 
       <h4 className="mb-3 fw-semibold">All Transactions</h4>
       <div className="table-responsive">
