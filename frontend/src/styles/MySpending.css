@@ -96,10 +96,12 @@
   padding: 16px;
   width: 100%;
   max-width: 520px;
-  min-height: 220px;
+  min-height: 340px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .chart-container {
-  height: 180px;
+  height: 300px;
+  position: relative;
+  width: 100%;
 }
