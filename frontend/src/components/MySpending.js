@@ -50,21 +50,21 @@ const MySpending = ({userId = 1}) => {
       <h2 className="mb-4">Hello Username!</h2>
 
       <div className="summary-row myspending-summary">
-        <div className="summary-card bg-primary text-white">
+        <div className="summary-card net-outflow-card bg-primary">
           <h4 className="card-title">Net Outflow</h4>
           <h1 className="fw-bold">${netOutflow}</h1>
         </div>
 
-        <div className="summary-card bg-light">
-          <h1 className="text-primary fw-bold">{topCategory}</h1>
+        <div className="summary-card top-category-card">
+          <h1 className="fw-bold">{topCategory}</h1>
           <p className="mb-0">is your top category this month</p>
         </div>
 
-        <div className="summary-card bg-light">
-          <h5 className="text-primary">Shared Paid:</h5>
-          <h5 className="fw-bold">${sharedPaid}</h5>
-          <h5 className="text-primary mt-2">Reimbursed:</h5>
-          <h5 className="fw-bold">${reimbursed}</h5>
+        <div className="summary-card shared-paid-card">
+          <h5 className="shared-label">Shared Paid:</h5>
+          <h5 className="shared-amount">${sharedPaid}</h5>
+          <h5 className="shared-label mt-2">Reimbursed:</h5>
+          <h5 className="shared-amount">${reimbursed}</h5>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ const MySpending = ({userId = 1}) => {
         </div>
       )}
 
-      <h4 className="mb-3 fw-semibold">All Transactions</h4>
+      <h4 className="mb-3 fw-semibold">My Transactions</h4>
       <div className="table-responsive">
         <table className="table table-hover align-middle">
           <thead>
@@ -129,7 +129,7 @@ const MySpending = ({userId = 1}) => {
       {/* Full Transactions Modal */}
       <Modal show={showAllModal} onHide={() => setShowAllModal(false)} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>All Transactions</Modal.Title>
+          <Modal.Title>My Transactions</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="table-responsive">

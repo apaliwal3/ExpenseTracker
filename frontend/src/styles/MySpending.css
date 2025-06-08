@@ -4,40 +4,66 @@
   width: 320px;
   max-width: 100%;
   border-radius: 12px;
-  padding: 16px;
-  background-color: #d4d5d5;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
   border: none;
+  color: #ffffff;
+}
+
+.myspending-summary .card h1,
+.summary-card h1 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.myspending-summary .card h5,
+.myspending-summary .card h4,
+.myspending-summary .card h6 {
+  margin-bottom: 0;
+  font-weight: 600;
+  color: #ffffff;
 }
 
 .summary-card {
   height: 150px;
   width: 320px;
   max-width: 100%;
-  padding: 16px;
+  padding: 20px;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
   border: none;
+  position: relative;
+  overflow: hidden;
+  color: inherit;
 }
 
-.myspending-summary .card h5,
-.myspending-summary .card h4,
-.myspending-summary .card h1,
-.myspending-summary .card h6 {
-  margin-bottom: 0;
+.summary-card h1,
+.summary-card h5 {
+  color: inherit;
+  font-weight: 600;
+}
+
+.summary-card p {
+  color: inherit;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 
 .myspending-summary .card.bg-primary {
-  color: #fafafa;
+  background: #ffffff;
+  color: #ffffff;
 }
 
 .table th,
@@ -72,14 +98,24 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {
-  .summary-card {
+  .summary-card,
+  .myspending-summary .card {
     height: auto;
     width: 100%;
+    min-height: 140px;
+  }
+  
+  .insight-card {
+    min-height: 300px;
+  }
+  
+  .summary-row {
+    gap: 1rem;
   }
 }
 
@@ -93,15 +129,59 @@
 .insight-card {
   background-color: #ffffff;
   border-radius: 12px;
-  padding: 16px;
+  padding: 20px;
   width: 100%;
   max-width: 520px;
   min-height: 340px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.insight-card:hover,
+.summary-card:hover,
+.myspending-summary .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .chart-container {
   height: 300px;
   position: relative;
   width: 100%;
+}
+
+/* Net Outflow Card */
+.net-outflow-card {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: #fff;
+}
+.net-outflow-card h1,
+.net-outflow-card h4 {
+  color: #fff ;
+}
+
+/* Top Category Card */
+.top-category-card {
+  background: #fff;
+  color: #000;
+}
+.top-category-card h1 {
+  color: #2563eb;
+  font-weight: 700;
+}
+.top-category-card p {
+  color: #000;
+}
+
+/* Shared Paid Card */
+.shared-paid-card {
+  background: #ffffff;
+}
+.shared-paid-card .shared-label {
+  color: #2563eb;
+  font-weight: 600;
+}
+.shared-paid-card .shared-amount {
+  color: #000;
+  font-weight: 700;
 }
