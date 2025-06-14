@@ -1,71 +1,212 @@
-.myspending-summary .card {
-  min-height: 150px;
-  height: 150px;
-  width: 320px;
-  max-width: 100%;
+/* Tile Grid Layout */
+.tiles-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.tile {
+  background: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  background: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition: all 0.3s ease;
-  border: none;
-  color: #ffffff;
+  min-height: 150px;
 }
 
-.myspending-summary .card h1,
-.summary-card h1 {
-  color: #ffffff;
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Chart Tile - spans 2 columns on larger screens */
+.tile.chart-tile {
+  min-height: 340px;
+  grid-column: span 2;
+}
+
+@media (max-width: 1024px) {
+  .tile.chart-tile {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .tiles-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .tile {
+    min-height: 140px;
+  }
+  
+  .tile.chart-tile {
+    min-height: 300px;
+    grid-column: span 1;
+  }
+}
+
+/* Net Outflow Tile */
+.tile.net-outflow-tile {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: #fff;
+}
+
+.tile.net-outflow-tile h1,
+.tile.net-outflow-tile h4 {
+  color: #fff;
+  margin: 0;
+}
+
+.tile.net-outflow-tile h1 {
   font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: -1px;
 }
 
-.myspending-summary .card h5,
-.myspending-summary .card h4,
-.myspending-summary .card h6 {
-  margin-bottom: 0;
+.tile.net-outflow-tile h4 {
   font-weight: 600;
-  color: #ffffff;
 }
 
-.summary-card {
-  height: 150px;
-  width: 320px;
-  max-width: 100%;
+/* Top Category Tile */
+.tile.top-category-tile {
+  background: #ffffff;
+  color: #000;
+}
+
+.tile.top-category-tile h1 {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 2.5rem;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.tile.top-category-tile p {
+  color: #000;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Shared Paid Tile */
+.tile.shared-paid-tile {
+  background: #ffffff;
+}
+
+.tile.shared-paid-tile .shared-label {
+  color: #2563eb;
+  font-weight: 600;
+  margin: 0;
+}
+
+.tile.shared-paid-tile .shared-amount {
+  color: #000;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tile.shared-paid-tile .mt-2 {
+  margin-top: 0.5rem !important;
+}
+
+/* Chart Tile */
+.tile.chart-tile {
   padding: 20px;
+}
+
+.chart-container {
+  height: 300px;
+  position: relative;
+  width: 100%;
+}
+
+/* Anomaly Tiles - Same size as other tiles, now part of main grid */
+.tile.anomaly-tile {
+  background: #ffffff;
   border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #fff;
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  border: none;
-  position: relative;
-  overflow: hidden;
-  color: inherit;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
 }
 
-.summary-card h1,
-.summary-card h5 {
-  color: inherit;
+.tile.anomaly-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.tile.anomaly-tile .anomaly-section-title {
   font-weight: 600;
+  color: #000;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
 }
 
-.summary-card p {
-  color: inherit;
+.tile.anomaly-tile .anomaly-category {
+  font-weight: 700;
+  color: #dc3545;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tile.anomaly-tile .anomaly-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.tile.anomaly-tile .anomaly-content div {
   font-size: 0.9rem;
+  color: #333;
+}
+
+.tile.anomaly-tile .anomaly-content .z-score {
+  color: #6c757d;
+  font-size: 0.8rem;
   margin-top: 0.5rem;
 }
 
-.myspending-summary .card.bg-primary {
+.tile.no-anomalies-tile {
   background: #ffffff;
-  color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  color: #198754;
+  font-size: 1.25rem;
+  min-height: 150px;
+  transition: all 0.3s ease;
+  text-align: left;
 }
 
+.tile.no-anomalies-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.tile.no-anomalies-tile .anomaly-section-title {
+  font-weight: 600;
+  color: #000;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Table styles */
 .table th,
 .table td {
   vertical-align: middle;
@@ -92,104 +233,4 @@
 
 .myspending-modal .modal-body p {
   margin-bottom: 0.5rem;
-}
-
-.summary-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-@media (max-width: 768px) {
-  .summary-card,
-  .myspending-summary .card {
-    height: auto;
-    width: 100%;
-    min-height: 140px;
-  }
-  
-  .insight-card {
-    min-height: 300px;
-  }
-  
-  .summary-row {
-    gap: 1rem;
-  }
-}
-
-.insights-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.insight-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  width: 100%;
-  max-width: 520px;
-  min-height: 340px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.insight-card:hover,
-.summary-card:hover,
-.myspending-summary .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-.chart-container {
-  height: 300px;
-  position: relative;
-  width: 100%;
-}
-
-/* Net Outflow Card */
-.net-outflow-card {
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-  color: #fff;
-}
-.net-outflow-card h1,
-.net-outflow-card h4 {
-  color: #fff ;
-}
-
-/* Top Category Card */
-.top-category-card {
-  background: #fff;
-  color: #000;
-}
-.top-category-card h1 {
-  color: #2563eb;
-  font-weight: 700;
-}
-.top-category-card p {
-  color: #000;
-}
-
-/* Shared Paid Card */
-.shared-paid-card {
-  background: #ffffff;
-}
-.shared-paid-card .shared-label {
-  color: #2563eb;
-  font-weight: 600;
-}
-.shared-paid-card .shared-amount {
-  color: #000;
-  font-weight: 700;
-}
-
-/* Anomaly Card */
-.anomaly-card .card {
-  height: 100%;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  padding: 1rem;
 }

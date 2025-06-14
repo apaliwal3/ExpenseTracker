@@ -62,50 +62,51 @@ const MySpending = ({userId = 1}) => {
     <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
       <h2 className="mb-4">Hello Username!</h2>
 
-      <div className="summary-row myspending-summary">
-        <div className="summary-card net-outflow-card bg-primary">
-          <h4 className="card-title">Net Outflow</h4>
-          <h1 className="fw-bold">${netOutflow}</h1>
+      {/* Main Tiles Grid */}
+      <div className="tiles-container">
+        {/* Net Outflow Tile */}
+        <div className="tile net-outflow-tile">
+          <h4>Net Outflow</h4>
+          <h1>${netOutflow}</h1>
         </div>
 
-        <div className="summary-card top-category-card">
-          <h1 className="fw-bold">{topCategory}</h1>
-          <p className="mb-0">is your top category this month</p>
+        {/* Top Category Tile */}
+        <div className="tile top-category-tile">
+          <h1>{topCategory}</h1>
+          <p>is your top category this month</p>
         </div>
 
-        <div className="summary-card shared-paid-card">
+        {/* Shared Paid Tile */}
+        <div className="tile shared-paid-tile">
           <h5 className="shared-label">Shared Paid:</h5>
           <h5 className="shared-amount">${sharedPaid}</h5>
           <h5 className="shared-label mt-2">Reimbursed:</h5>
           <h5 className="shared-amount">${reimbursed}</h5>
         </div>
-      </div>
 
-      {Object.keys(trendData).length > 0 && (
-        <div className="insights-grid">
-          <SpendingTrendsChart trends={trendData} />
-          {}
-        </div>
-      )}
+        {/* Chart Tile */}
+        {Object.keys(trendData).length > 0 && (
+          <div className="tile chart-tile">
+            <SpendingTrendsChart trends={trendData} />
+          </div>
+        )}
 
-      <h5 className="fw-semibold mb-3">Spending Anomalies</h5>
-
-      <div className="row g-3 mb-4">
+        {/* Spending Anomalies Tiles - Part of main grid */}
         {anomalies.length === 0 ? (
-          <div className="col-md-12">
-            <div className="card p-3 text-success shadow-sm d-flex align-items-center justify-content-center" style={{ height: '100%' }}>
-              <div className="fs-5">✅ No anomalies to report</div>
-            </div>
+          <div className="tile no-anomalies-tile">
+            <div className="anomaly-section-title">Spending Anomalies</div>
+            <div>✅ No anomalies to report</div>
           </div>
         ) : (
           anomalies.map((a, idx) => (
-            <div className="col-md-4" key={idx}>
-              <div className="card shadow-sm p-3 h-100">
-                <h6 className="fw-bold text-danger mb-2">{a.category}</h6>
+            <div className="tile anomaly-tile" key={idx}>
+              <div className="anomaly-section-title">Spending Anomalies</div>
+              <div className="anomaly-category">{a.category}</div>
+              <div className="anomaly-content">
                 <div><strong>Month:</strong> {new Date(a.month).toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
                 <div><strong>Amount:</strong> ${a.amount.toFixed(2)}</div>
                 <div><strong>Type:</strong> {a.type}</div>
-                <div className="text-muted small mt-2">
+                <div className="z-score">
                   Z-Score: {parseFloat(a.z_score).toFixed(2)}
                 </div>
               </div>
@@ -114,7 +115,7 @@ const MySpending = ({userId = 1}) => {
         )}
       </div>
 
-
+      {/* Transactions Table */}
       <h4 className="mb-3 fw-semibold">My Transactions</h4>
       <div className="table-responsive">
         <table className="table table-hover align-middle">
