@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../src/db');
+const { parse } = require('dotenv');
 
 router.get('/users/:userId/spending', async (req, res) => {
   const userId = parseInt(req.params.userId);
@@ -177,4 +178,55 @@ router.get('/users/:userId/spending-trends', async (req, res) => {
   }
 });  
 
+router.get('/users/:userId/spending-anomalies', async (req, res) => {
+  const userId = parseInt(req.params.userId);
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+  try{
+    const rows = await pool.query(`
+      SELECT
+        c.name AS category,
+        DATE_TRUNC('month', e.created_at) AS month,
+        SUM(e.amount) AS total
+      FROM expenses e
+      JOIN categories c ON e.category_id = c.id
+      WHERE e.user_id = $1
+      GROUP BY c.name, month
+      ORDER BY month
+    `, [userId]);
+
+    const categoryTotals = {};
+    rows.forEach(r => {
+      const {category, month, total} = r;
+      if (!categoryTotals[category]) categoryTotals[category] = [];
+      categoryTotals[category].push({ month, total: parseFloat(total) });
+    });
+
+    const anomalies = [];
+
+    for (const [category, data] of Object.entries(categoryTotals)){
+      const totals = data.map(d => d.total);
+      const mean = totals.reduce((a, b) => a + b, 0) / totals.length;
+      const std = Math.sqrt(totals.reduce((sum, val) => sum + (val - mean) ** 2, 0) / totals.length);
+
+      data.forEach(d => {
+        const z = std === 0 ? 0 : (d.total - mean) / std;
+        if (Math.abs(z) > 2) {
+          anomalies.push({
+            category,
+            month: d.month,
+            amount: d.total,
+            z_score: z.toFixed(2),
+            type: z > 0 ? 'Spike' : 'Drop'
+          });
+        }
+      });
+    }
+    res.json(anomalies);
+  } catch (err) {
+    console.error('Failed to fetch spending anomalies:', err);
+    res.status(500).json({ error: 'Failed to fetch spending anomalies' });
+  }
+}); 
 module.exports = router;
