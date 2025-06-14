@@ -11,6 +11,7 @@ const MySpending = ({userId = 1}) => {
   const [transactions, setTransactions] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [trendData, setTrendData] = useState({});
+  const [anomalies, setAnomalies] = useState([]);
 
   useEffect(() => {
     const fetchSpending = async () => {
@@ -45,6 +46,18 @@ const MySpending = ({userId = 1}) => {
     fetchTrends();
   }, [userId]);
 
+  useEffect(() => {
+    const fetchAnomalies = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/api/users/${userId}/spending-anomalies`);
+        setAnomalies(res.data || []);
+      } catch (err) {
+        console.error('Failed to fetch anomalies:', err);
+      }
+    };
+    fetchAnomalies();
+  }, [userId]);
+
   return (
     <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
       <h2 className="mb-4">Hello Username!</h2>
@@ -71,9 +84,36 @@ const MySpending = ({userId = 1}) => {
       {Object.keys(trendData).length > 0 && (
         <div className="insights-grid">
           <SpendingTrendsChart trends={trendData} />
-          {/* Add more <div className="insight-card"> for other insights later */}
+          {}
         </div>
       )}
+
+      <h5 className="fw-semibold mb-3">Spending Anomalies</h5>
+
+      <div className="row g-3 mb-4">
+        {anomalies.length === 0 ? (
+          <div className="col-md-12">
+            <div className="card p-3 text-success shadow-sm d-flex align-items-center justify-content-center" style={{ height: '100%' }}>
+              <div className="fs-5">✅ No anomalies to report</div>
+            </div>
+          </div>
+        ) : (
+          anomalies.map((a, idx) => (
+            <div className="col-md-4" key={idx}>
+              <div className="card shadow-sm p-3 h-100">
+                <h6 className="fw-bold text-danger mb-2">{a.category}</h6>
+                <div><strong>Month:</strong> {new Date(a.month).toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
+                <div><strong>Amount:</strong> ${a.amount.toFixed(2)}</div>
+                <div><strong>Type:</strong> {a.type}</div>
+                <div className="text-muted small mt-2">
+                  Z-Score: {parseFloat(a.z_score).toFixed(2)}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
 
       <h4 className="mb-3 fw-semibold">My Transactions</h4>
       <div className="table-responsive">

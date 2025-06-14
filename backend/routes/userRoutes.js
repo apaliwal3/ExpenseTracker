@@ -197,7 +197,7 @@ router.get('/users/:userId/spending-anomalies', async (req, res) => {
     `, [userId]);
 
     const categoryTotals = {};
-    rows.forEach(r => {
+    rows.rows.forEach(r => {
       const {category, month, total} = r;
       if (!categoryTotals[category]) categoryTotals[category] = [];
       categoryTotals[category].push({ month, total: parseFloat(total) });
