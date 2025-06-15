@@ -12,6 +12,7 @@ const MySpending = ({userId = 1}) => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [trendData, setTrendData] = useState({});
   const [anomalies, setAnomalies] = useState([]);
+  const [forecast, setForecast] = useState(null);
 
   useEffect(() => {
     const fetchSpending = async () => {
@@ -38,11 +39,20 @@ const MySpending = ({userId = 1}) => {
     const fetchTrends = async () => {
       try {
         const res = await axios.get(`http://localhost:5001/api/users/${userId}/spending-trends`);
-        setTrendData(res.data);
+        const { trends, forecast, months } = res.data;
+
+        console.log('Raw API response:', res.data);
+      
+        setTrendData({
+          trends: trends,
+          forecast: forecast,
+          months: months
+        });
       } catch (err) {
-        console.error('Failed to fetch trend data:', err);
+        console.error('Failed to fetch trends:', err);
       }
     };
+
     fetchTrends();
   }, [userId]);
 
@@ -56,6 +66,18 @@ const MySpending = ({userId = 1}) => {
       }
     };
     fetchAnomalies();
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchForecast = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/api/users/${userId}/spending-forecast`);
+        setForecast(res.data);
+      } catch (err) {
+        console.error('Failed to fetch forecast:', err);
+      }
+    };
+    fetchForecast();
   }, [userId]);
 
   return (
@@ -87,7 +109,7 @@ const MySpending = ({userId = 1}) => {
         {/* Chart Tile */}
         {Object.keys(trendData).length > 0 && (
           <div className="tile chart-tile">
-            <SpendingTrendsChart trends={trendData} />
+            <SpendingTrendsChart trendsData={trendData} />
           </div>
         )}
 
@@ -112,6 +134,23 @@ const MySpending = ({userId = 1}) => {
               </div>
             </div>
           ))
+        )}
+
+        {forecast && forecast.forecast ? (
+          <div className="tile forecast-tile">
+            <h5 style={{ fontWeight: '600' }}>📈 Projected Spending</h5>
+            <h2 style={{ fontWeight: '700', color: '#1e40af' }}>
+              ${forecast.forecast}
+            </h2>
+            <p style={{ margin: 0, fontSize: '0.9rem' }}>
+              Based on {forecast.sampleDays} days of data, avg ${forecast.avgDaily}/day
+            </p>
+          </div>
+        ) : (
+          <div className="tile forecast-tile">
+            <h5 style={{ fontWeight: '600' }}>📈 Projected Spending</h5>
+            <p style={{ color: '#6c757d' }}>Not enough data this month to project.</p>
+          </div>
         )}
       </div>
 

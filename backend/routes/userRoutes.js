@@ -142,41 +142,102 @@ router.get('/users/:userId/spending', async (req, res) => {
   }
 });
 
+const calculateWeightedForecast = (monthlyTotals) => {
+  if (monthlyTotals.length === 0) return 0;
+  
+  let weightedSum = 0;
+  let totalWeight = 0;
+  
+  monthlyTotals.forEach((amount, index) => {
+    const weight = index + 1; // More recent months get higher weight
+    weightedSum += amount * weight;
+    totalWeight += weight;
+  });
+  
+  return weightedSum / totalWeight;
+};
+
 router.get('/users/:userId/spending-trends', async (req, res) => {
   const userId = parseInt(req.params.userId);
-
-  if (isNaN(userId)){
-    return res.status(400).json({ error: 'Invalid user ID' });
-  }
+  if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
 
   try {
-    const {rows} = await pool.query(`
+    // Get historical monthly totals by category (last 6 months)
+    const { rows } = await pool.query(`
       SELECT
         c.name AS category,
-        TO_CHAR(e.created_at, 'YYYY-MM') AS month,
+        TO_CHAR(e.created_at, 'Mon') AS month,
+        DATE_TRUNC('month', e.created_at) AS month_raw,
         SUM(e.amount) AS total
       FROM expenses e
       JOIN categories c ON e.category_id = c.id
       WHERE e.user_id = $1
-      GROUP BY c.name, month
-      ORDER BY month
+        AND e.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months'
+      GROUP BY c.name, month, month_raw
+      ORDER BY month_raw
     `, [userId]);
 
     const trends = {};
+    const monthsSet = new Set();
+    const categoryMonthlyTotals = {};
+
     rows.forEach(row => {
-      if (!trends[row.category]) trends[row.category] = [];
-      trends[row.category].push({
-        month: row.month,
-        amount: parseFloat(row.total),
-      });
+      if (!trends[row.category]) trends[row.category] = {};
+      if (!categoryMonthlyTotals[row.category]) categoryMonthlyTotals[row.category] = [];
+      
+      trends[row.category][row.month] = parseFloat(row.total);
+      categoryMonthlyTotals[row.category].push(parseFloat(row.total));
+      monthsSet.add(row.month);
     });
 
-    res.json(trends);
-  } catch (err) { 
+    // Calculate forecast for next month using historical averages
+    const nextMonth = new Date(new Date().setMonth(new Date().getMonth() + 1))
+      .toLocaleString('default', { month: 'short' });
+    monthsSet.add(nextMonth);
+
+    // Create months array in chronological order
+    const currentYear = new Date().getFullYear();
+    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const months = Array.from(monthsSet).sort((a, b) => {
+      return monthOrder.indexOf(a) - monthOrder.indexOf(b);
+    });
+
+    // Calculate forecast for each category based on historical average
+    const categoryForecasts = {};
+    Object.entries(categoryMonthlyTotals).forEach(([category, monthlyTotals]) => {
+      if (monthlyTotals.length > 0) {
+        const weightedForecast = calculateWeightedForecast(monthlyTotals);
+        categoryForecasts[category] = parseFloat(weightedForecast.toFixed(2));
+        
+        // Add forecast to trends data
+        trends[category][nextMonth] = categoryForecasts[category];
+      }
+    });
+
+    // Calculate overall forecast (sum of all categories)
+    const totalForecast = Object.values(categoryForecasts).reduce((sum, forecast) => sum + forecast, 0);
+
+    console.log('Forecast data:', { categoryForecasts, totalForecast, nextMonth }); // Debug log
+
+    const response = {
+      trends,
+      forecast: {
+        month: nextMonth,
+        amount: parseFloat(totalForecast.toFixed(2)),
+        categoryForecasts
+      },
+      months
+    };
+
+    res.json(response);
+
+  } catch (err) {
     console.error('Failed to fetch spending trends:', err);
     res.status(500).json({ error: 'Failed to fetch spending trends' });
   }
-});  
+});
 
 router.get('/users/:userId/spending-anomalies', async (req, res) => {
   const userId = parseInt(req.params.userId);
@@ -206,6 +267,8 @@ router.get('/users/:userId/spending-anomalies', async (req, res) => {
     const anomalies = [];
 
     for (const [category, data] of Object.entries(categoryTotals)){
+      if (data.length < 3) continue; // Need at least 3 data points for meaningful anomaly detection
+      
       const totals = data.map(d => d.total);
       const mean = totals.reduce((a, b) => a + b, 0) / totals.length;
       const std = Math.sqrt(totals.reduce((sum, val) => sum + (val - mean) ** 2, 0) / totals.length);
@@ -223,10 +286,54 @@ router.get('/users/:userId/spending-anomalies', async (req, res) => {
         }
       });
     }
+    
+    // Sort anomalies by month (most recent first)
+    anomalies.sort((a, b) => new Date(b.month) - new Date(a.month));
+    
     res.json(anomalies);
   } catch (err) {
     console.error('Failed to fetch spending anomalies:', err);
     res.status(500).json({ error: 'Failed to fetch spending anomalies' });
   }
-}); 
+});
+
+router.get('/users/:userId/spending-forecast', async (req, res) => {
+  const userId = parseInt(req.params.userId);
+  if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT DATE_TRUNC('day', created_at) AS day, SUM(amount) AS daily_total
+      FROM expenses
+      WHERE user_id = $1
+        AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)
+      GROUP BY day
+      ORDER BY day
+    `, [userId]);
+
+    if (rows.length < 2) {
+      return res.json({ forecast: null, reason: "Not enough data" });
+    }
+
+    const dailyTotals = rows.map(r => parseFloat(r.daily_total));
+    const avgDaily = dailyTotals.reduce((a, b) => a + b, 0) / dailyTotals.length;
+
+    const today = new Date();
+    const totalDaysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const daysElapsed = today.getDate();
+
+    const projectedTotal = avgDaily * totalDaysInMonth;
+
+    res.json({ 
+      forecast: projectedTotal.toFixed(2),
+      daysElapsed,
+      avgDaily: avgDaily.toFixed(2),
+      sampleDays: dailyTotals.length
+    });
+  } catch (err) {
+    console.error('Forecast error:', err);
+    res.status(500).json({ error: 'Failed to calculate forecast' });
+  }
+});
+
 module.exports = router;
