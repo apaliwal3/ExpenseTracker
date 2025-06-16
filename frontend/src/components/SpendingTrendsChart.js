@@ -56,7 +56,7 @@ const SpendingTrendsChart = ({ trendsData }) => {
     const isBeforeForecast = idx === normalizedMonths.indexOf(forecast?.month) - 1;
 
     if (isForecastMonth || isBeforeForecast) {
-      return categoryTrends[month] || 0; // Fix: Direct access to amount
+      return categoryTrends[month] || 0;
     }
     return null;
   });
@@ -203,7 +203,7 @@ const SpendingTrendsChart = ({ trendsData }) => {
           {categoryForecast > 0 && (
             <div>
               <small className="text-muted">Next Month Forecast</small>
-              <h6 className="mb-0 text-info">${categoryForecast.toFixed(2)}</h6>
+              <h6 className="mb-0 text-primary">${categoryForecast.toFixed(2)}</h6>
             </div>
           )}
         </div>

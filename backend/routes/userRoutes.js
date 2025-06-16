@@ -99,7 +99,6 @@ router.get('/users/:userId/spending', async (req, res) => {
 
     client.release();
 
-    // 🔁 Deduplicate by expense ID and merge shared_with + settled status
     const expenseMap = new Map();
 
     transactionsRes.rows.forEach(txn => {
@@ -123,7 +122,6 @@ router.get('/users/:userId/spending', async (req, res) => {
       settled: txn.settled_flags.every(Boolean),
     }));
 
-    // 🧾 Final output
     res.json({
       total_paid: parseFloat(personalRes.rows[0].total_paid),
       total_shared_paid: parseFloat(sharedPaidRes.rows[0].total_shared_paid),
@@ -162,7 +160,6 @@ router.get('/users/:userId/spending-trends', async (req, res) => {
   if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
 
   try {
-    // Get historical monthly totals by category (last 6 months)
     const { rows } = await pool.query(`
       SELECT
         c.name AS category,
@@ -267,7 +264,7 @@ router.get('/users/:userId/spending-anomalies', async (req, res) => {
     const anomalies = [];
 
     for (const [category, data] of Object.entries(categoryTotals)){
-      if (data.length < 3) continue; // Need at least 3 data points for meaningful anomaly detection
+      if (data.length < 3) continue;
       
       const totals = data.map(d => d.total);
       const mean = totals.reduce((a, b) => a + b, 0) / totals.length;
@@ -287,52 +284,12 @@ router.get('/users/:userId/spending-anomalies', async (req, res) => {
       });
     }
     
-    // Sort anomalies by month (most recent first)
     anomalies.sort((a, b) => new Date(b.month) - new Date(a.month));
     
     res.json(anomalies);
   } catch (err) {
     console.error('Failed to fetch spending anomalies:', err);
     res.status(500).json({ error: 'Failed to fetch spending anomalies' });
-  }
-});
-
-router.get('/users/:userId/spending-forecast', async (req, res) => {
-  const userId = parseInt(req.params.userId);
-  if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
-
-  try {
-    const { rows } = await pool.query(`
-      SELECT DATE_TRUNC('day', created_at) AS day, SUM(amount) AS daily_total
-      FROM expenses
-      WHERE user_id = $1
-        AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)
-      GROUP BY day
-      ORDER BY day
-    `, [userId]);
-
-    if (rows.length < 2) {
-      return res.json({ forecast: null, reason: "Not enough data" });
-    }
-
-    const dailyTotals = rows.map(r => parseFloat(r.daily_total));
-    const avgDaily = dailyTotals.reduce((a, b) => a + b, 0) / dailyTotals.length;
-
-    const today = new Date();
-    const totalDaysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const daysElapsed = today.getDate();
-
-    const projectedTotal = avgDaily * totalDaysInMonth;
-
-    res.json({ 
-      forecast: projectedTotal.toFixed(2),
-      daysElapsed,
-      avgDaily: avgDaily.toFixed(2),
-      sampleDays: dailyTotals.length
-    });
-  } catch (err) {
-    console.error('Forecast error:', err);
-    res.status(500).json({ error: 'Failed to calculate forecast' });
   }
 });
 
