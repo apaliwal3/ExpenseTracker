@@ -12,6 +12,7 @@ const MySpending = ({userId = 1}) => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [trendData, setTrendData] = useState({});
   const [anomalies, setAnomalies] = useState([]);
+  const [categoryDrift, setCategoryDrift] = useState([]);
 
   useEffect(() => {
     const fetchSpending = async () => {
@@ -65,6 +66,18 @@ const MySpending = ({userId = 1}) => {
       }
     };
     fetchAnomalies();
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchCategoryDrift = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/api/users/${userId}/category-drift`);
+        setCategoryDrift(res.data || []);
+      } catch (err) {
+        console.error('Failed to fetch category drift:', err);
+      }
+    };
+    fetchCategoryDrift();
   }, [userId]);
 
   return (
@@ -123,6 +136,43 @@ const MySpending = ({userId = 1}) => {
           ))
         )}
 
+        {/* Category Drift Tiles */}
+{/* Category Drift Tiles */}
+        {categoryDrift.length > 0 && (
+          <div className="tile drift-tile">
+            <h5 style={{ fontWeight: '600' }}>Category Shifts</h5>
+            <div style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
+              {categoryDrift.slice(0, 3).map((item, idx) => {
+                const formatShiftText = (category, percentChange) => {
+                  const absChange = Math.abs(percentChange);
+                  
+                  if (percentChange > 0) {
+                    return `Your spending on ${category} is up ${absChange}% this month`;
+                  } else if (percentChange < 0) {
+                    return `You have spent ${absChange}% less on ${category} this month compared to last month`;
+                  } else {
+                    return `Your ${category} spending remained the same this month`;
+                  }
+                };
+
+                return (
+                  <div key={idx} style={{ 
+                    marginBottom: '8px', 
+                    padding: '6px 0',
+                    borderBottom: idx < categoryDrift.slice(0, 3).length - 1 ? '1px solid #eee' : 'none'
+                  }}>
+                    <span style={{ 
+                      color: item.percent_change > 0 ? '#d63384' : 
+                             item.percent_change < 0 ? '#198754' : '#6c757d'
+                    }}>
+                      {formatShiftText(item.category, item.percent_change)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Transactions Table */}

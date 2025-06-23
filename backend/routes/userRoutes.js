@@ -293,4 +293,54 @@ router.get('/users/:userId/spending-anomalies', async (req, res) => {
   }
 });
 
+router.get('/users/:userId/category-drift', async (req, res) => {
+  const userId = parseInt(req.params.userId);
+
+  if(isNaN(userId)){
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+
+  try {
+    const result = await pool.query(`
+      WITH this_month AS (
+        SELECT c.name AS category, SUM(e.amount) AS total
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        WHERE e.user_id = $1 AND DATE_TRUNC('month', e.created_at) = DATE_TRUNC('month', CURRENT_DATE)
+        GROUP BY c.name
+      ),
+      last_month AS (
+        SELECT c.name AS category, SUM(e.amount) AS total
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        WHERE e.user_id = $1 AND DATE_TRUNC('month', e.created_at) = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
+        GROUP BY c.name
+      )
+      SELECT
+        COALESCE(t.category, l.category) AS category,
+        COALESCE(t.total, 0) AS this_month,
+        COALESCE(l.total, 0) AS last_month,
+        ROUND(
+          CASE
+            WHEN COALESCE(l.total, 0) = 0 AND COALESCE(t.total, 0) > 0 THEN 100.0
+            WHEN COALESCE(l.total, 0) = 0 THEN 0
+            ELSE ((t.total - l.total) / l.total) * 100
+          END, 1
+        ) AS percent_change
+      FROM this_month t
+      FULL OUTER JOIN last_month l ON t.category = l.category
+      ORDER BY ABS(
+        CASE
+          WHEN COALESCE(l.total, 0) = 0 THEN 100
+          ELSE ((t.total - l.total) / l.total) * 100
+        END
+      ) DESC;
+      `, [userId]);
+
+      res.json(result.rows);
+  } catch (err) {
+    console.error('Failed to fetch category drift:', err);
+    res.status(500).json({ error: 'Failed to fetch category drift' });
+  }
+});
 module.exports = router;
