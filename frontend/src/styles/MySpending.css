@@ -126,84 +126,181 @@
   width: 100%;
 }
 
-/* Anomaly Tiles - Same size as other tiles, now part of main grid */
-.tile.anomaly-tile {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  min-height: 150px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  text-align: left;
+/* Anomaly Tiles */
+.tile.anomaly-tile.anomaly-spike {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
 }
 
-.tile.anomaly-tile:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+.tile.anomaly-tile.anomaly-drop {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
 }
 
 .tile.anomaly-tile .anomaly-section-title {
-  font-weight: 600;
+  font-weight: 700;
   color: #000;
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
 }
 
 .tile.anomaly-tile .anomaly-category {
-  font-weight: 700;
-  color: #dc3545;
-  font-size: 1.5rem;
+  font-weight: 800;
+  font-size: 1.6rem;
   margin-bottom: 0.5rem;
 }
 
-.tile.anomaly-tile .anomaly-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  width: 100%;
+.tile.anomaly-spike .anomaly-category {
+  color: #dc2626;
+}
+
+.tile.anomaly-drop .anomaly-category {
+  color: #16a34a;
 }
 
 .tile.anomaly-tile .anomaly-content div {
-  font-size: 0.9rem;
-  color: #333;
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-weight: 600;
 }
 
-.tile.anomaly-tile .anomaly-content .z-score {
-  color: #6c757d;
-  font-size: 0.8rem;
+.tile.anomaly-tile .anomaly-amount {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.tile.anomaly-tile .anomaly-type {
+  font-weight: 700;
+}
+
+.tile.anomaly-spike .anomaly-type {
+  color: #dc2626;
+}
+
+.tile.anomaly-drop .anomaly-type {
+  color: #16a34a;
+}
+
+.tile.anomaly-tile .z-score {
+  color: #6b7280;
+  font-size: 0.85rem;
   margin-top: 0.5rem;
+  font-weight: 500;
 }
 
+/* No Anomalies Tile */
 .tile.no-anomalies-tile {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  color: #198754;
-  font-size: 1.25rem;
-  min-height: 150px;
-  transition: all 0.3s ease;
-  text-align: left;
-}
-
-.tile.no-anomalies-tile:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
 }
 
 .tile.no-anomalies-tile .anomaly-section-title {
-  font-weight: 600;
+  font-weight: 700;
   color: #000;
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
+}
+
+/* Drift Tile Styles */
+.tile.drift-tile {
+  background: #ffffff;
+  position: relative;
+  min-height: 180px;
+}
+
+.drift-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.drift-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.drift-nav-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.drift-nav-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: scale(1.1);
+}
+
+.drift-nav-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.drift-indicator {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+}
+
+.drift-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.drift-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.drift-text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.drift-change-indicator {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* Mobile responsiveness for drift tile */
+@media (max-width: 768px) {
+  .drift-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  
+  .drift-navigation {
+    align-self: flex-end;
+  }
+  
+  .drift-text {
+    font-size: 0.95rem;
+  }
+  
+  .drift-change {
+    font-size: 1.25rem;
+  }
 }
 
 /* Table styles */

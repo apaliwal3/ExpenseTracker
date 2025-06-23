@@ -13,6 +13,7 @@ const MySpending = ({userId = 1}) => {
   const [trendData, setTrendData] = useState({});
   const [anomalies, setAnomalies] = useState([]);
   const [categoryDrift, setCategoryDrift] = useState([]);
+  const [currentDriftIndex, setCurrentDriftIndex] = useState(0);
 
   useEffect(() => {
     const fetchSpending = async () => {
@@ -113,21 +114,24 @@ const MySpending = ({userId = 1}) => {
           </div>
         )}
 
-        {/* Spending Anomalies Tiles - Part of main grid */}
+        {/* Spending Anomalies Tiles */}
         {anomalies.length === 0 ? (
           <div className="tile no-anomalies-tile">
             <div className="anomaly-section-title">Spending Anomalies</div>
-            <div color='green'>No anomalies to report</div>
+            <div style={{ color: '#198754', fontWeight: '600' }}>No anomalies to report</div>
           </div>
         ) : (
           anomalies.map((a, idx) => (
-            <div className="tile anomaly-tile" key={idx}>
+            <div 
+              className={`tile anomaly-tile ${a.type === 'Spike' ? 'anomaly-spike' : 'anomaly-drop'}`} 
+              key={idx}
+            >
               <div className="anomaly-section-title">Spending Anomalies</div>
               <div className="anomaly-category">{a.category}</div>
               <div className="anomaly-content">
                 <div><strong>Month:</strong> {new Date(a.month).toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
-                <div><strong>Amount:</strong> ${a.amount.toFixed(2)}</div>
-                <div><strong>Type:</strong> {a.type}</div>
+                <div><strong>Amount:</strong> <span className="anomaly-amount">${a.amount.toFixed(2)}</span></div>
+                <div><strong>Type:</strong> <span className="anomaly-type">{a.type}</span></div>
                 <div className="z-score">
                   Z-Score: {parseFloat(a.z_score).toFixed(2)}
                 </div>
@@ -136,41 +140,71 @@ const MySpending = ({userId = 1}) => {
           ))
         )}
 
-        {/* Category Drift Tiles */}
-{/* Category Drift Tiles */}
+        {/* Category Drift Tiles - Multi-page */}
         {categoryDrift.length > 0 && (
           <div className="tile drift-tile">
-            <h5 style={{ fontWeight: '600' }}>Category Shifts</h5>
-            <div style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
-              {categoryDrift.slice(0, 3).map((item, idx) => {
+            <div className="drift-content">
+              {categoryDrift[currentDriftIndex] && (() => {
+                const item = categoryDrift[currentDriftIndex];
                 const formatShiftText = (category, percentChange) => {
                   const absChange = Math.abs(percentChange);
                   
                   if (percentChange > 0) {
-                    return `Your spending on ${category} is up ${absChange}% this month`;
+                    return (
+                      <span>
+                        Your spending on <strong>{category}</strong> is up{' '}
+                        <strong style={{ color: '#2563eb' }}>{absChange}%</strong> this month
+                      </span>
+                    );
                   } else if (percentChange < 0) {
-                    return `You have spent ${absChange}% less on ${category} this month compared to last month`;
+                    return (
+                      <span>
+                        You have spent{' '}
+                        <strong style={{ color: '#2563eb' }}>{absChange}%</strong> less on{' '}
+                        <strong>{category}</strong> this month compared to last month
+                      </span>
+                    );
                   } else {
-                    return `Your ${category} spending remained the same this month`;
+                    return (
+                      <span>
+                        Your <strong>{category}</strong> spending remained the same this month
+                      </span>
+                    );
                   }
                 };
 
                 return (
-                  <div key={idx} style={{ 
-                    marginBottom: '8px', 
-                    padding: '6px 0',
-                    borderBottom: idx < categoryDrift.slice(0, 3).length - 1 ? '1px solid #eee' : 'none'
-                  }}>
-                    <span style={{ 
-                      color: item.percent_change > 0 ? '#d63384' : 
-                             item.percent_change < 0 ? '#198754' : '#6c757d'
-                    }}>
+                  <div className="drift-item">
+                    <div className="drift-text">
                       {formatShiftText(item.category, item.percent_change)}
-                    </span>
+                    </div>
                   </div>
                 );
-              })}
+              })()}
             </div>
+                <div className="drift-navigation">
+                  <button 
+                    className="drift-nav-btn"
+                    onClick={() => setCurrentDriftIndex(prev => 
+                      prev === 0 ? categoryDrift.length - 1 : prev - 1
+                    )}
+                    disabled={categoryDrift.length <= 1}
+                  >
+                    ‹
+                  </button>
+                  <span className="drift-indicator">
+                    {currentDriftIndex + 1} / {categoryDrift.length}
+                  </span>
+                  <button 
+                    className="drift-nav-btn"
+                    onClick={() => setCurrentDriftIndex(prev => 
+                      prev === categoryDrift.length - 1 ? 0 : prev + 1
+                    )}
+                    disabled={categoryDrift.length <= 1}
+                  >
+                    ›
+                  </button>
+                </div>
           </div>
         )}
       </div>
