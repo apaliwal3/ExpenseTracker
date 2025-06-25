@@ -6,8 +6,8 @@ const pool = require('../src/db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
 
-// Register a new user
-router.post('/register', async (req, res) => {
+// Signup a new user
+router.post('/signup', async (req, res) => {
   const {name, email, password} = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'All fields required' });
