@@ -4,6 +4,7 @@ import {Modal, Button} from 'react-bootstrap';
 import '../styles/MySpending.css';
 import { TbAlertCircleFilled } from "react-icons/tb";
 import SpendingTrendsChart from './SpendingTrendsChart';
+import axiosInstance from '../api/AxiosInstance';
 
 const MySpending = ({userId = 1}) => {
   const [summary, setSummary] = useState([]);
@@ -18,7 +19,7 @@ const MySpending = ({userId = 1}) => {
   useEffect(() => {
     const fetchSpending = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/users/${userId}/spending`);
+        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/spending`);
         setSummary(res.data);
         setTransactions(res.data.transactions || []);
       } catch (err) {
@@ -39,7 +40,7 @@ const MySpending = ({userId = 1}) => {
   useEffect(() => {
     const fetchTrends = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/users/${userId}/spending-trends`);
+        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/spending-trends`);
         const { trends, forecast, months } = res.data;
 
         console.log('Raw API response:', res.data);
@@ -60,7 +61,7 @@ const MySpending = ({userId = 1}) => {
   useEffect(() => {
     const fetchAnomalies = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/users/${userId}/spending-anomalies`);
+        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/spending-anomalies`);
         setAnomalies(res.data || []);
       } catch (err) {
         console.error('Failed to fetch anomalies:', err);
@@ -72,7 +73,7 @@ const MySpending = ({userId = 1}) => {
   useEffect(() => {
     const fetchCategoryDrift = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/users/${userId}/category-drift`);
+        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/category-drift`);
         setCategoryDrift(res.data || []);
       } catch (err) {
         console.error('Failed to fetch category drift:', err);

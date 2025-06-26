@@ -3,8 +3,16 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../src/db');
+const rateLimit = require('express-rate-limit');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
+
+// Rate limiting for signup and login routes
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: { error: 'Too many requests, please try again later.' }
+});
 
 // Signup a new user
 router.post('/signup', async (req, res) => {
@@ -19,16 +27,20 @@ router.post('/signup', async (req, res) => {
       'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email',
       [name, email, hashed]
     );
-    res.status(200).json(result.rows[0]);
+    const user = result.rows[0];
+    const token = jwt.sign({ userId: user.id, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+    res.status(201).json({ token, user });
   } catch (err) {
     console.error(err);
-    if (err.code === '23505') return res.status(409).json({ error: 'Email already in use' });
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Email already in use' });
+    }
     res.status(500).json({ error: 'Registration failed' });
   }
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const {email, password} = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password required' });

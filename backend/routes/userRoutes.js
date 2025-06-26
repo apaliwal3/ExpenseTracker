@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../src/db');
 const { parse } = require('dotenv');
+const authenticateToken = require('../middleware/authMiddleware');
 
-router.get('/users/:userId/spending', async (req, res) => {
+router.get('/users/:userId/spending', authenticateToken, async (req, res) => {
   const userId = parseInt(req.params.userId);
 
   if (isNaN(userId)) {
@@ -155,7 +156,7 @@ const calculateWeightedForecast = (monthlyTotals) => {
   return weightedSum / totalWeight;
 };
 
-router.get('/users/:userId/spending-trends', async (req, res) => {
+router.get('/users/:userId/spending-trends', authenticateToken, async (req, res) => {
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' });
 
@@ -236,7 +237,7 @@ router.get('/users/:userId/spending-trends', async (req, res) => {
   }
 });
 
-router.get('/users/:userId/spending-anomalies', async (req, res) => {
+router.get('/users/:userId/spending-anomalies', authenticateToken, async (req, res) => {
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) {
     return res.status(400).json({ error: 'Invalid user ID' });
@@ -293,7 +294,7 @@ router.get('/users/:userId/spending-anomalies', async (req, res) => {
   }
 });
 
-router.get('/users/:userId/category-drift', async (req, res) => {
+router.get('/users/:userId/category-drift', authenticateToken, async (req, res) => {
   const userId = parseInt(req.params.userId);
 
   if(isNaN(userId)){
