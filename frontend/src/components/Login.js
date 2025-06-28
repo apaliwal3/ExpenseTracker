@@ -5,10 +5,12 @@ import { useNavigate, Link } from 'react-router-dom';
 const Login = ({ setUser }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
 
     try {
       const res = await axios.post('http://localhost:5001/api/auth/login', {
@@ -24,13 +26,18 @@ const Login = ({ setUser }) => {
       navigate('/');
     } catch (err) {
       console.error('Login failed:', err);
-      alert(err.response?.data?.error || 'Login error');
+      setError(err.response?.data?.error || 'Login error');
     }
   };
 
   return (
     <div className="container mt-5" style={{ maxWidth: 400 }}>
       <h2>Log In</h2>
+      {error && (
+        <div className="alert alert-danger mt-3" role="alert">
+          {error}
+        </div>
+      )}
       <form onSubmit={handleLogin}>
         <div className="mb-3">
           <label className="form-label">Email</label>

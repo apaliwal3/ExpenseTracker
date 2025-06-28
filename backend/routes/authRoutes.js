@@ -53,7 +53,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const valid = bcrypt.compare(password, user.password_hash);
+    const valid = await bcrypt.compare(password, user.password_hash);
     if(!valid){
       return res.status(401).json({ error: 'Incorrect password' });
     }

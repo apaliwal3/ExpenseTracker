@@ -6,10 +6,12 @@ const Signup = ({ setUser }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setError('');
 
     try {
       const res = await axios.post('http://localhost:5001/api/auth/signup', {
@@ -24,13 +26,18 @@ const Signup = ({ setUser }) => {
       navigate('/');
     } catch (err) {
       console.error('Signup failed:', err);
-      alert(err.response?.data?.error || 'Signup error');
+      setError(err.response?.data?.error || 'Signup error');
     }
   };
 
   return (
     <div className="container mt-5" style={{ maxWidth: 400 }}>
       <h2>Sign Up</h2>
+      {error && (
+        <div className="alert alert-danger mt-3" role="alert">
+          {error}
+        </div>
+      )}
       <form onSubmit={handleSignup}>
         <div className="mb-3">
           <label className="form-label">Name</label>
