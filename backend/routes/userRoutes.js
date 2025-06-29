@@ -78,6 +78,8 @@ router.get('/users/:userId/spending', authenticateToken, async (req, res) => {
         e.amount,
         e.description,
         c.name AS category,
+        e.user_id,
+        u.name AS created_by,
         e.created_at,
         CASE
           WHEN se.id IS NOT NULL THEN 'shared'
@@ -87,6 +89,7 @@ router.get('/users/:userId/spending', authenticateToken, async (req, res) => {
         se.owed_by,
         sd.id IS NOT NULL AS settled
       FROM expenses e
+      JOIN users u ON e.user_id = u.id
       LEFT JOIN shared_expenses se ON e.id = se.expense_id
       LEFT JOIN settled_debts sd ON
         sd.expense_id = se.expense_id AND
@@ -129,7 +132,9 @@ router.get('/users/:userId/spending', authenticateToken, async (req, res) => {
       total_reimbursed: parseFloat(reimbursedRes.rows[0].total_reimbursed),
       total_owed: parseFloat(owedRes.rows[0].total_owed),
       net_spent:
-        parseFloat(personalRes.rows[0].total_paid) -
+        parseFloat(personalRes.rows[0].total_paid) +
+        parseFloat(sharedPaidRes.rows[0].total_shared_paid) +
+        parseFloat(owedRes.rows[0].total_owed) -
         parseFloat(reimbursedRes.rows[0].total_reimbursed),
       top_category: topCategoryRes.rows[0]?.name || null,
       transactions
@@ -162,17 +167,25 @@ router.get('/users/:userId/spending-trends', authenticateToken, async (req, res)
 
   try {
     const { rows } = await pool.query(`
-      SELECT
-        c.name AS category,
-        TO_CHAR(e.created_at, 'Mon') AS month,
-        DATE_TRUNC('month', e.created_at) AS month_raw,
-        SUM(e.amount) AS total
-      FROM expenses e
-      JOIN categories c ON e.category_id = c.id
-      WHERE e.user_id = $1
-        AND e.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months'
-      GROUP BY c.name, month, month_raw
-      ORDER BY month_raw
+    SELECT
+      c.name AS category,
+      TO_CHAR(e.created_at, 'Mon') AS month,
+      DATE_TRUNC('month', e.created_at) AS month_raw,
+      SUM(
+        CASE
+          WHEN se.owed_by = $1 THEN se.amount  -- User's share of shared expense
+          WHEN e.user_id = $1 AND se.id IS NULL THEN e.amount  -- User's personal expense
+          ELSE 0
+        END
+      ) AS total
+    FROM expenses e
+    JOIN categories c ON e.category_id = c.id
+    LEFT JOIN shared_expenses se ON e.id = se.expense_id
+    WHERE 
+      (se.owed_by = $1 OR e.user_id = $1)
+      AND e.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months'
+    GROUP BY c.name, month, month_raw
+    ORDER BY month_raw;
     `, [userId]);
 
     const trends = {};
@@ -247,11 +260,18 @@ router.get('/users/:userId/spending-anomalies', authenticateToken, async (req, r
       SELECT
         c.name AS category,
         DATE_TRUNC('month', e.created_at) AS month,
-        SUM(e.amount) AS total
-      FROM expenses e
-      JOIN categories c ON e.category_id = c.id
-      WHERE e.user_id = $1
-      GROUP BY c.name, month
+        SUM(
+          CASE
+            WHEN se.owed_by = $1 THEN se.amount
+            WHEN e.user_id = $1 AND se.id IS NULL THEN e.amount
+            ELSE 0
+          END
+        ) AS total
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        LEFT JOIN shared_expenses se ON e.id = se.expense_id
+        WHERE e.created_at >= CURRENT_DATE - INTERVAL '6 months'
+          AND (e.user_id = $1 OR se.owed_by = $1)
       ORDER BY month
     `, [userId]);
 
@@ -303,19 +323,32 @@ router.get('/users/:userId/category-drift', authenticateToken, async (req, res) 
 
   try {
     const result = await pool.query(`
-      WITH this_month AS (
-        SELECT c.name AS category, SUM(e.amount) AS total
+      WITH user_expenses AS (
+        SELECT 
+          c.name AS category,
+          DATE_TRUNC('month', e.created_at) AS month,
+          CASE
+            WHEN se.owed_by = $1 THEN se.amount
+            WHEN e.user_id = $1 AND se.id IS NULL THEN e.amount
+            ELSE 0
+          END AS amount
         FROM expenses e
         JOIN categories c ON e.category_id = c.id
-        WHERE e.user_id = $1 AND DATE_TRUNC('month', e.created_at) = DATE_TRUNC('month', CURRENT_DATE)
-        GROUP BY c.name
+        LEFT JOIN shared_expenses se ON e.id = se.expense_id
+        WHERE e.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+          AND (e.user_id = $1 OR se.owed_by = $1)
+      ),
+      this_month AS (
+        SELECT category, SUM(amount) AS total
+        FROM user_expenses
+        WHERE month = DATE_TRUNC('month', CURRENT_DATE)
+        GROUP BY category
       ),
       last_month AS (
-        SELECT c.name AS category, SUM(e.amount) AS total
-        FROM expenses e
-        JOIN categories c ON e.category_id = c.id
-        WHERE e.user_id = $1 AND DATE_TRUNC('month', e.created_at) = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
-        GROUP BY c.name
+        SELECT category, SUM(amount) AS total
+        FROM user_expenses
+        WHERE month = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
+        GROUP BY category
       )
       SELECT
         COALESCE(t.category, l.category) AS category,

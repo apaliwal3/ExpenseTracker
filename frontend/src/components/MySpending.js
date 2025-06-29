@@ -15,6 +15,7 @@ const MySpending = ({userId = 1}) => {
   const [anomalies, setAnomalies] = useState([]);
   const [categoryDrift, setCategoryDrift] = useState([]);
   const [currentDriftIndex, setCurrentDriftIndex] = useState(0);
+  const [viewMode, setViewMode] = useState('involved');
 
   useEffect(() => {
     const fetchSpending = async () => {
@@ -30,12 +31,20 @@ const MySpending = ({userId = 1}) => {
     fetchSpending();
   }, [userId]);
 
+  
+
   const topCategory = summary.top_category || 'N/A';
   const netOutflow = summary.net_spent?.toFixed(2) || 0.00;
   const sharedPaid = summary.total_shared_paid?.toFixed(2) || 0.00;
   const reimbursed = summary.total_reimbursed?.toFixed(2) || 0.00;
 
-  const preview = transactions.slice(0, 5);
+  const involvedTransactions = transactions;
+  const paidTransactions = transactions.filter(txn =>
+    txn.user_id === userId || txn.paid_by === userId
+  );
+
+  const visibleTransactions = viewMode === 'paid' ? paidTransactions : involvedTransactions;
+  const preview = visibleTransactions.slice(0, 5);
 
   useEffect(() => {
     const fetchTrends = async () => {
@@ -101,11 +110,14 @@ const MySpending = ({userId = 1}) => {
         </div>
 
         {/* Shared Paid Tile */}
-        <div className="tile shared-paid-tile">
-          <h5 className="shared-label">Shared Paid:</h5>
-          <h5 className="shared-amount">${sharedPaid}</h5>
-          <h5 className="shared-label mt-2">Reimbursed:</h5>
-          <h5 className="shared-amount">${reimbursed}</h5>
+        <div className="tile spending-breakdown-tile">
+          <h5 className="fw-semibold">Spending Breakdown</h5>
+          <div className="mt-2">
+            <div><strong>Personal Expenses:</strong> ${Number(summary.total_paid).toFixed(2)}</div>
+            <div><strong>Owed to You:</strong> ${Number(summary.total_reimbursed).toFixed(2)}</div>
+            <div><strong>You Owe Others:</strong> ${Number(summary.total_owed).toFixed(2)}</div>
+            <div><strong>You Paid for Others:</strong> ${Number(summary.total_shared_paid).toFixed(2)}</div>
+          </div>
         </div>
 
         {/* Chart Tile */}
@@ -211,7 +223,23 @@ const MySpending = ({userId = 1}) => {
       </div>
 
       {/* Transactions Table */}
-      <h4 className="mb-3 fw-semibold">My Transactions</h4>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <h4 className="fw-semibold">My Transactions</h4>
+        <div>
+          <button
+            className={`btn btn-sm me-2 ${viewMode === 'involved' ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => setViewMode('involved')}
+          >
+            Involved
+          </button>
+          <button
+            className={`btn btn-sm ${viewMode === 'paid' ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => setViewMode('paid')}
+          >
+            Paid
+          </button>
+        </div>
+      </div>
       <div className="table-responsive">
         <table className="table table-hover align-middle">
           <thead>
@@ -220,13 +248,14 @@ const MySpending = ({userId = 1}) => {
               <th>Description</th>
               <th>Date</th>
               <th>Type</th>
+              <th>Created By</th>
               <th>Shared With</th>
               <th>Status</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {preview.map((txn, idx) => (
+            {visibleTransactions.map((txn, idx) => (
               <tr key={idx}>
                 <td>${Number(txn.amount).toFixed(2)}</td>
                 <td>{txn.description || '—'}</td>
@@ -236,6 +265,7 @@ const MySpending = ({userId = 1}) => {
                     {txn.type}
                   </span>
                 </td>
+                <td>{txn.created_by || '—'}</td>
                 <td>{txn.shared_with?.join(', ') || '—'}</td>
                 <td>
                   <span className={`badge ${txn.settled ? 'bg-success' : 'bg-warning text-dark'}`}>
@@ -281,7 +311,7 @@ const MySpending = ({userId = 1}) => {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((txn, idx) => (
+                {visibleTransactions.map((txn, idx) => (
                   <tr key={idx}>
                     <td>${Number(txn.amount).toFixed(2)}</td>
                     <td>{txn.description || '—'}</td>
