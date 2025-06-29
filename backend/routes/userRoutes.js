@@ -267,12 +267,13 @@ router.get('/users/:userId/spending-anomalies', authenticateToken, async (req, r
             ELSE 0
           END
         ) AS total
-        FROM expenses e
-        JOIN categories c ON e.category_id = c.id
-        LEFT JOIN shared_expenses se ON e.id = se.expense_id
-        WHERE e.created_at >= CURRENT_DATE - INTERVAL '6 months'
-          AND (e.user_id = $1 OR se.owed_by = $1)
-      ORDER BY month
+      FROM expenses e
+      JOIN categories c ON e.category_id = c.id
+      LEFT JOIN shared_expenses se ON e.id = se.expense_id
+      WHERE e.created_at >= CURRENT_DATE - INTERVAL '6 months'
+        AND (e.user_id = $1 OR se.owed_by = $1)
+      GROUP BY c.name, DATE_TRUNC('month', e.created_at)
+      ORDER BY DATE_TRUNC('month', e.created_at)
     `, [userId]);
 
     const categoryTotals = {};

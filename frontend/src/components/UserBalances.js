@@ -10,54 +10,56 @@ const UserBalances = () => {
 
   useEffect(() => {
     fetchTotals();
-    fetchSuggestions();
-    fetchSettled();
   }, []);
 
   const fetchTotals = async () => {
     try {
       const res = await axios.get('http://localhost:5001/api/expenses/shared-expenses/user-totals');
       setTotals(res.data);
+      setSettlements(calculateSettlements(res.data));
     } catch (err) {
       console.error('Failed to load user balances:', err);
     }
   };
 
-  const fetchSuggestions = async () => {
-    try {
-      const res = await axios.get('http://localhost:5001/api/settlements/suggestions');
-      const suggestions = res.data.map((row, i) => ({
-        id: i + 1,
-        expense_id: row.expense_id,
-        from_id: row.owed_by,
-        to_id: row.paid_to,
-        from: row.owed_by_name,
-        to: row.paid_to_name,
-        amount: Number(row.amount)
-      }));
-      setSettlements(suggestions);
-    } catch (err) {
-      console.error('Failed to load suggestions:', err);
-    }
-  };
+  const calculateSettlements = (users) => {
+    const creditors = [];
+    const debtors = [];
 
-  const fetchSettled = async () => {
-    try {
-      const res = await axios.get('http://localhost:5001/api/settlements');
-      const settledList = res.data.map((row, i) => ({
-        id: i + 1,
-        expense_id: row.expense_id,
-        from_id: row.owed_by,
-        to_id: row.paid_to,
-        from: row.owed_by_name,
-        to: row.paid_to_name,
-        amount: Number(row.amount),
-        settled_at: row.settled_at
-      }));
-      setSettled(settledList);
-    } catch (err) {
-      console.error('Failed to load settled debts:', err);
+    users.forEach(user => {
+      const balance = Number(Number(user.net_balance).toFixed(2));
+      if (balance > 0) creditors.push({ ...user, balance });
+      else if (balance < 0) debtors.push({ ...user, balance: -balance });
+    });
+
+    creditors.sort((a, b) => b.balance - a.balance);
+    debtors.sort((a, b) => b.balance - a.balance);
+
+    const transactions = [];
+    let tid = 0;
+
+    while (creditors.length && debtors.length) {
+      const creditor = creditors[0];
+      const debtor = debtors[0];
+      const amount = Math.min(creditor.balance, debtor.balance);
+
+      transactions.push({
+        id: ++tid,
+        from: debtor.name,
+        from_id: debtor.user_id,
+        to: creditor.name,
+        to_id: creditor.user_id,
+        amount,
+      });
+
+      creditor.balance -= amount;
+      debtor.balance -= amount;
+
+      if (creditor.balance < 0.01) creditors.shift();
+      if (debtor.balance < 0.01) debtors.shift();
     }
+
+    return transactions;
   };
 
   const handleMarkAsPaid = async (txn) => {
@@ -66,92 +68,109 @@ const UserBalances = () => {
         owed_by: txn.from_id,
         paid_to: txn.to_id,
         amount: txn.amount,
-        expense_id: txn.expense_id
+        expense_id: txn.expense_id,
       });
 
       setSettled(prev => [...prev, txn]);
       setSettlements(prev => prev.filter(t => t.id !== txn.id));
       fetchTotals();
-      fetchSuggestions();
     } catch (err) {
       console.error('Failed to save settlement:', err);
     }
   };
 
-
-
   return (
-    <div className="user-balances-container">
-      <h2 className="user-balances-title">User Balances</h2>
-      
-      <table className="table table-bordered text-center align-middle">
-        <thead className="table-light">
-          <tr>
-            <th>Name</th>
-            <th>Total Paid</th>
-            <th>Total Owed</th>
-            <th>Net Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          {totals.map(user => (
-            <tr key={user.user_id}>
-              <td className="fw-semibold">{user.name}</td>
-              <td>${Number(user.total_paid).toFixed(2)}</td>
-              <td>${Number(user.total_owed).toFixed(2)}</td>
-              <td className={
-                user.net_balance > 0 ? 'text-success fw-bold' :
-                user.net_balance < 0 ? 'text-danger fw-bold' :
-                'text-muted'
-              }>
-                {user.net_balance >= 0 ? '+' : ''}${Number(user.net_balance).toFixed(2)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
+      <h2 className="mb-4">User Balances</h2>
 
+      {/* User Balance Cards Grid */}
+      <div className="tiles-container mb-4">
+        {totals.map(user => (
+          <div 
+            key={user.user_id} 
+            className={`tile balance-tile ${
+              user.net_balance > 0 ? 'balance-positive' : 
+              user.net_balance < 0 ? 'balance-negative' : 
+              'balance-neutral'
+            }`}
+          >
+            <div className="balance-header">
+              <h4 className="balance-name">{user.name}</h4>
+              <div className={`balance-amount ${
+                user.net_balance > 0 ? 'text-success' : 
+                user.net_balance < 0 ? 'text-danger' : 
+                'text-muted'
+              }`}>
+                {user.net_balance >= 0 ? '+' : ''}${Number(user.net_balance).toFixed(2)}
+              </div>
+            </div>
+            <div className="balance-details">
+              <div className="balance-detail-item">
+                <span className="label">Total Paid:</span>
+                <span className="value">${Number(user.total_paid).toFixed(2)}</span>
+              </div>
+              <div className="balance-detail-item">
+                <span className="label">Total Owed:</span>
+                <span className="value">${Number(user.total_owed).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Settlement Suggestions */}
       {settlements.length > 0 && (
-        <div className="mt-5">
-          <h4 className="fw-semibold mb-3 text-primary">💸 Settle Up Suggestions</h4>
-          <ul className="list-group">
+        <div className="mb-4">
+          <h4 className="fw-semibold mb-3">Settle Up Suggestions</h4>
+          <div className="settlement-cards">
             {settlements.map(txn => (
-              <li key={txn.id} className="list-group-item d-flex justify-content-between align-items-center">
-                <span>
-                  <strong>{txn.from}</strong> pays <strong>{txn.to}</strong> ${txn.amount.toFixed(2)}
-                </span>
+              <div key={txn.id} className="tile settlement-tile">
+                <div className="settlement-content">
+                  <div className="settlement-text">
+                    <strong>{txn.from}</strong> pays <strong>{txn.to}</strong>
+                  </div>
+                  <div className="settlement-amount">
+                    ${txn.amount.toFixed(2)}
+                  </div>
+                </div>
                 <button
-                  className="btn btn-sm btn-outline-primary"
+                  className="btn btn-primary btn-sm settlement-btn"
                   onClick={() => handleMarkAsPaid(txn)}
                 >
                   Mark as Paid
                 </button>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
+      {/* Settled Payments */}
       {settled.length > 0 && (
         <div className="mt-4">
           <button
-            className="btn btn-link"
+            className="btn btn-link fw-semibold"
             onClick={() => setShowSettled(prev => !prev)}
           >
             {showSettled ? 'Hide' : 'Show'} Settled Payments ({settled.length})
           </button>
 
           {showSettled && (
-            <ul className="list-group mt-2">
+            <div className="settled-cards mt-3">
               {settled.map(txn => (
-                <li key={txn.id} className="list-group-item d-flex justify-content-between align-items-center">
-                  <span>
-                    <strong>{txn.from}</strong> paid <strong>{txn.to}</strong> ${txn.amount.toFixed(2)}
-                  </span>
+                <div key={txn.id} className="tile settled-tile">
+                  <div className="settlement-content">
+                    <div className="settlement-text">
+                      <strong>{txn.from}</strong> paid <strong>{txn.to}</strong>
+                    </div>
+                    <div className="settlement-amount">
+                      ${txn.amount.toFixed(2)}
+                    </div>
+                  </div>
                   <span className="badge bg-success">Settled</span>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       )}

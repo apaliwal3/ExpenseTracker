@@ -1,37 +1,220 @@
-.user-balances-container {
-  padding-top: 1.5rem;
-  font-family: "Instrument Sans", sans-serif;
+/* Tile Grid Layout - matching MySpending */
+.tiles-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.user-balances-title {
-  font-weight: 600;
-  color: #0d6efd;
+.tile {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 150px;
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Balance Tiles */
+.tile.balance-tile {
+  min-height: 160px;
+}
+
+.balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 1rem;
 }
 
-.table th,
-.table td {
-  vertical-align: middle;
-  text-align: center;
+.balance-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.balance-amount {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.balance-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.balance-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 0.95rem;
 }
 
-.table th {
-  font-weight: 600;
-}
-
-.table td.fw-semibold {
+.balance-detail-item .label {
+  color: #6b7280;
   font-weight: 500;
 }
 
-.text-success {
-  color: #198754 !important;
+.balance-detail-item .value {
+  color: #1f2937;
+  font-weight: 600;
 }
 
-.text-danger {
-  color: #dc3545 !important;
+/* Balance tile color variations */
+.tile.balance-positive {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
 }
 
-.text-muted {
-  color: #6c757d !important;
+.tile.balance-negative {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.tile.balance-neutral {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+/* Settlement Cards */
+.settlement-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tile.settlement-tile {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.settlement-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.settlement-text {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.settlement-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.settlement-btn {
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.settlement-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* Settled Cards */
+.settled-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tile.settled-tile {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-left: 4px solid #16a34a;
+}
+
+.tile.settled-tile .settlement-amount {
+  color: #16a34a;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .tiles-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .tile {
+    min-height: 140px;
+  }
+  
+  .tile.balance-tile {
+    min-height: 150px;
+  }
+  
+  .balance-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .balance-amount {
+    font-size: 1.5rem;
+  }
+  
+  .balance-name {
+    font-size: 1.25rem;
+  }
+  
+  .tile.settlement-tile,
+  .tile.settled-tile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    min-height: 120px;
+  }
+  
+  .settlement-content {
+    width: 100%;
+  }
+  
+  .settlement-btn {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .tiles-container {
+    gap: 0.75rem;
+  }
+  
+  .tile {
+    padding: 15px;
+  }
+  
+  .balance-detail-item {
+    font-size: 0.9rem;
+  }
+  
+  .settlement-text {
+    font-size: 0.95rem;
+  }
+  
+  .settlement-amount {
+    font-size: 1.1rem;
+  }
 }
