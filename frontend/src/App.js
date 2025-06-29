@@ -64,7 +64,7 @@ const AppWrapper = () => {
         />
         <Route
           path="/"
-          element={user ? <MySpending userId={user.id} /> : <Navigate to="/login" />}
+          element={user ? <MySpending userId={user.id} userName={user.name}/> : <Navigate to="/login" />}
         />
         <Route
           path="/balances"

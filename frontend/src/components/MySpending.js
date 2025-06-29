@@ -6,7 +6,7 @@ import { TbAlertCircleFilled } from "react-icons/tb";
 import SpendingTrendsChart from './SpendingTrendsChart';
 import axiosInstance from '../api/AxiosInstance';
 
-const MySpending = ({userId = 1}) => {
+const MySpending = ({userId = 1, userName = "User" }) => {
   const [summary, setSummary] = useState([]);
   const [showAllModal, setShowAllModal] = useState(false);
   const [transactions, setTransactions] = useState([]);
@@ -93,7 +93,7 @@ const MySpending = ({userId = 1}) => {
 
   return (
     <div className="container py-4" style={{ fontFamily: '"Instrument Sans", sans-serif' }}>
-      <h2 className="mb-4">Hello Username!</h2>
+      <h2 className="mb-4">Hello {userName}!</h2>
 
       {/* Main Tiles Grid */}
       <div className="tiles-container">
