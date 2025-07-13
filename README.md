@@ -45,7 +45,7 @@ A full-stack personal and shared finance tracker built with **React**, **Node.js
 
 ## 📷 Screenshots
 
-_📸 Add screenshots or a short demo GIF here showing key UI features._
+_Screenshots to be added here_
 
 ## Running Locally
 
