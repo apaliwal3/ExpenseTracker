@@ -20,7 +20,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (description && !categoryOption) {
-        axios.post('http://localhost:5001/api/expenses/classify', { description })
+        axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/classify`, { description })
           .then(res => {
             const predicted = res.data.category;
             setCategoryOption({ label: predicted, value: predicted });
@@ -49,7 +49,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
       const category = categoryOption.value;
 
       // Step 1: create expense
-      const expenseRes = await axios.post('http://localhost:5001/api/expenses', {
+      const expenseRes = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/expenses`, {
         amount: numericAmount,
         description,
         category,
@@ -71,7 +71,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
             amount: splitAmount,
           }));
 
-        await axios.post('http://localhost:5001/api/expenses/shared-expenses', {
+        await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/shared-expenses`, {
           expense_id: expense.id,
           paid_by: selectedUserId,
           participants: participantIds,
@@ -105,7 +105,7 @@ const ExpenseForm = ({ onAdd, categories, fetchCategories, users }) => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5001/api/expenses/categories/${categoryToDelete}`);
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/categories/${categoryToDelete}`);
       await fetchCategories();
       setCategoryOption(null);
     } catch (err) {

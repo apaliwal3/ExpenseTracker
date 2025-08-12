@@ -13,6 +13,37 @@ services:
       - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    
+  backend:
+    build: ./backend
+    container_name: expense_tracker_backend
+    depends_on:
+      - postgres
+    env_file:
+      - ./backend/.env
+    environment:
+      ML_SERVICE_URL: http://ml_service:5000
+    ports:
+      - "5001:5000"
+  
+  frontend:
+    build: ./frontend
+    container_name: expense_tracker_frontend
+    depends_on:
+      - backend
+    environment:
+      REACT_APP_API_BASE_URL: "http://localhost:5001"
+    ports:
+      - "3000:3000"
+  
+  ml_service:
+    build: ./ml-service
+    container_name: expense_tracker_ml
+    depends_on:
+      - backend
+    ports:
+      - "5002:5000"
 
 volumes:
   postgres-data:

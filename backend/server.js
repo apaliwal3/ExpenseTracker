@@ -16,7 +16,9 @@ app.use('/api/settlements', settlementsRoutes);
 app.use('/api', userRoutes);
 app.use('/api/auth', authRoutes);
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT,'0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
-})
+}).on('error', (err) => {
+    console.error('Server failed to start:', err);
+});

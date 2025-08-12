@@ -21,7 +21,7 @@ const GroupSpending = () => {
 
   const fetchExpenses = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/expenses');
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/expenses`);
       setExpenses(res.data);
     } catch (error) {
       console.error('Failed to fetch expenses:', error);
@@ -30,7 +30,7 @@ const GroupSpending = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/expenses/categories');
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/categories`);
       setCategories(res.data.map(row => row));
     } catch (err) {
       console.error('Failed to fetch categories:', err);
@@ -39,7 +39,7 @@ const GroupSpending = () => {
 
   const fetchFullySettled = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/settlements/fully-settled');
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/settlements/fully-settled`);
       setSettledExpenseIds(new Set(res.data));
     } catch (err) {
       console.error('Failed to fetch settled expenses:', err);
@@ -50,9 +50,9 @@ const GroupSpending = () => {
     const fetchData = async () => {
       try {
         const [expensesRes, categoriesRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:5001/api/expenses'),
-          axios.get('http://localhost:5001/api/expenses/categories'),
-          axios.get('http://localhost:5001/api/expenses/users'),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/expenses`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/categories`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/users`),
         ]);
         setExpenses(expensesRes.data);
         setCategories(categoriesRes.data.map(row => row));
@@ -68,7 +68,7 @@ const GroupSpending = () => {
 
   const handleDeleteExpense = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/api/expenses/${id}`);
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/${id}`);
       setExpenses(expenses.filter(exp => exp.id !== id));
       fetchFullySettled();
     } catch (error) {

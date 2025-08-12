@@ -20,7 +20,7 @@ const MySpending = ({userId = 1, userName = "User" }) => {
   useEffect(() => {
     const fetchSpending = async () => {
       try {
-        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/spending`);
+        const res = await axiosInstance.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/${userId}/spending`);
         setSummary(res.data);
         setTransactions(res.data.transactions || []);
       } catch (err) {
@@ -49,7 +49,7 @@ const MySpending = ({userId = 1, userName = "User" }) => {
   useEffect(() => {
     const fetchTrends = async () => {
       try {
-        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/spending-trends`);
+        const res = await axiosInstance.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/${userId}/spending-trends`);
         const { trends, forecast, months } = res.data;
 
         console.log('Raw API response:', res.data);
@@ -70,7 +70,7 @@ const MySpending = ({userId = 1, userName = "User" }) => {
   useEffect(() => {
     const fetchAnomalies = async () => {
       try {
-        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/spending-anomalies`);
+        const res = await axiosInstance.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/${userId}/spending-anomalies`);
         setAnomalies(res.data || []);
       } catch (err) {
         console.error('Failed to fetch anomalies:', err);
@@ -82,7 +82,7 @@ const MySpending = ({userId = 1, userName = "User" }) => {
   useEffect(() => {
     const fetchCategoryDrift = async () => {
       try {
-        const res = await axiosInstance.get(`http://localhost:5001/api/users/${userId}/category-drift`);
+        const res = await axiosInstance.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/${userId}/category-drift`);
         setCategoryDrift(res.data || []);
       } catch (err) {
         console.error('Failed to fetch category drift:', err);

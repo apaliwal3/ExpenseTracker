@@ -14,7 +14,7 @@ const UserBalances = () => {
 
   const fetchTotals = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/expenses/shared-expenses/user-totals');
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/expenses/shared-expenses/user-totals`);
       setTotals(res.data);
       setSettlements(calculateSettlements(res.data));
     } catch (err) {
@@ -64,7 +64,7 @@ const UserBalances = () => {
 
   const handleMarkAsPaid = async (txn) => {
     try {
-      await axios.post('http://localhost:5001/api/settlements', {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/settlements`, {
         owed_by: txn.from_id,
         paid_to: txn.to_id,
         amount: txn.amount,
