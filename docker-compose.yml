@@ -5,27 +5,34 @@ services:
     image: postgres:latest
     container_name: expense_tracker_db
     restart: always
+    env_file:
+      - ./backend/.env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-apaliwal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ase530kl}
+      POSTGRES_DB: ${POSTGRES_DB:-expensetracker}
     ports:
       - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - expense_tracker_network
     
   backend:
     build: ./backend
     container_name: expense_tracker_backend
     depends_on:
       - postgres
+      - ml_service
     env_file:
       - ./backend/.env
     environment:
       ML_SERVICE_URL: http://ml_service:5000
     ports:
       - "5001:5000"
+    networks:
+      - expense_tracker_network
   
   frontend:
     build: ./frontend
@@ -36,14 +43,20 @@ services:
       REACT_APP_API_BASE_URL: "http://localhost:5001"
     ports:
       - "3000:3000"
+    networks:
+      - expense_tracker_network
   
   ml_service:
     build: ./ml-service
     container_name: expense_tracker_ml
-    depends_on:
-      - backend
     ports:
       - "5002:5000"
+    networks:
+      - expense_tracker_network
 
 volumes:
   postgres-data:
+
+networks:
+  expense_tracker_network:
+    driver: bridge

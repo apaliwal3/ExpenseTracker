@@ -47,7 +47,55 @@ A full-stack personal and shared finance tracker built with **React**, **Node.js
 
 _Screenshots to be added here_
 
-## Running Locally
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker Desktop installed and running
+
+### Running the Application
+
+**Option 1: Using the startup script (Recommended)**
+```bash
+./start.sh
+```
+
+**Option 2: Using Docker Compose**
+```bash
+docker-compose up --build
+```
+
+The application will be available at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5001
+- **ML Service**: http://localhost:5002
+- **Database**: localhost:5433
+
+### Managing the Application
+
+**Stop all services:**
+```bash
+./stop.sh
+```
+
+**Restart services:**
+```bash
+./restart.sh
+```
+
+**View logs:**
+```bash
+./logs.sh              # All services
+./logs.sh ml_service   # Specific service
+```
+
+**Health check:**
+```bash
+./health-check.sh
+```
+
+For detailed instructions, see [QUICKSTART.md](QUICKSTART.md)
+
+## Running Locally (Without Docker)
 
 ### Prerequisites
 - Node.js + npm

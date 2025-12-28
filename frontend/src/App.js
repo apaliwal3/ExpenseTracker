@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
   Link,
-  useLocation
+  useLocation,
+  useNavigate
 } from 'react-router-dom';
 import GroupSpending from './components/GroupSpending';
 import UserBalances from './components/UserBalances';
@@ -24,14 +25,45 @@ const AppWrapper = () => {
   });
 
   const [showModal, setShowModal] = useState(false);
-
+  const navigate = useNavigate();
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
+  // Listen for token removal (from axios interceptor)
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
+      
+      if (!token || !savedUser) {
+        setUser(null);
+        if (!isAuthPage) {
+          navigate('/login?session=expired');
+        }
+      }
+    };
+
+    // Check on mount
+    checkAuth();
+
+    // Listen for storage changes (when axios interceptor clears token)
+    window.addEventListener('storage', checkAuth);
+    
+    // Custom event for same-tab logout
+    window.addEventListener('logout', checkAuth);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('logout', checkAuth);
+    };
+  }, [navigate, isAuthPage]);
+
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
     setShowModal(false);
+    window.dispatchEvent(new Event('logout'));
   };
 
   return (

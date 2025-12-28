@@ -42,7 +42,8 @@ async function getOrCreateCategoryId(categoryName) {
 
 async function getPredictedCategory(description) {
   try {
-    const res = await axios.post('http://127.0.0.1:5002/predict-category', { description });
+    const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://ml_service:5000';
+    const res = await axios.post(`${mlServiceUrl}/predict-category`, { description });
     return res.data.category;
   } catch (err) {
     console.error('Prediction failed:', err.message);
