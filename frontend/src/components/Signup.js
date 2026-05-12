@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-const Signup = ({ setUser }) => {
+const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,10 +20,9 @@ const Signup = ({ setUser }) => {
         password
       });
 
-      const user = res.data.user;
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-      navigate('/');
+      if (res.status === 201) {
+        navigate(`/login?signup=success&email=${encodeURIComponent(email)}`);
+      }
     } catch (err) {
       console.error('Signup failed:', err);
       setError(err.response?.data?.error || 'Signup error');

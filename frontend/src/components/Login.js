@@ -6,12 +6,22 @@ const Login = ({ setUser }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const prefilledEmail = searchParams.get('email');
+    if (prefilledEmail) {
+      setEmail(prefilledEmail);
+    }
+
     if (searchParams.get('session') === 'expired') {
       setError('Your session has expired. Please log in again.');
+      setSuccess('');
+    } else if (searchParams.get('signup') === 'success') {
+      setSuccess('Signup successful. Please log in.');
+      setError('');
     }
   }, [searchParams]);
 
@@ -30,9 +40,11 @@ const Login = ({ setUser }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
+      setSuccess('');
       navigate('/');
     } catch (err) {
       console.error('Login failed:', err);
+      setSuccess('');
       setError(err.response?.data?.error || 'Login error');
     }
   };
@@ -40,6 +52,11 @@ const Login = ({ setUser }) => {
   return (
     <div className="container mt-5" style={{ maxWidth: 400 }}>
       <h2>Log In</h2>
+      {success && (
+        <div className="alert alert-success mt-3" role="alert">
+          {success}
+        </div>
+      )}
       {error && (
         <div className="alert alert-danger mt-3" role="alert">
           {error}

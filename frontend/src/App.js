@@ -133,7 +133,6 @@ const AppWrapper = () => {
               <div className="fw-semibold">{user?.name || 'User'}</div>
             </div>
           </div>
-          <p><strong>Name:</strong> {user?.name}</p>
           <Button variant="danger" onClick={handleLogout}>Logout</Button>
         </Modal.Body>
       </Modal>
