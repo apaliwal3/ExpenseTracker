@@ -45,7 +45,14 @@ A full-stack personal and shared finance tracker built with **React**, **Node.js
 
 ## 📷 Screenshots
 
-_Screenshots to be added here_
+<img width="2676" height="2750" alt="Expense Tracker" src="https://github.com/user-attachments/assets/a0f2b1d6-b360-48cd-a153-e3f46c247554" />
+
+<img width="2676" height="1858" alt="Expense Tracker · 12 31pm · 05-12" src="https://github.com/user-attachments/assets/06235629-2fee-4462-866e-13cc0c6877d8" />
+
+<img width="2676" height="1858" alt="Expense Tracker · 12 32pm · 05-12 (1)" src="https://github.com/user-attachments/assets/238ac701-26e0-4dd6-b227-a42b0c441b52" />
+
+<img width="2676" height="1858" alt="Expense Tracker · 12 32pm · 05-12" src="https://github.com/user-attachments/assets/601be310-0dd6-4aea-a566-eae32ba5e2fe" />
+
 
 ## 🚀 Quick Start
 
