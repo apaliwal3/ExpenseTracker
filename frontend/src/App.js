@@ -17,6 +17,7 @@ import { Modal, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { AuthProvider } from './context/AuthContext';
+import Avatar from 'boring-avatars';
 
 const AppWrapper = () => {
   const [user, setUser] = useState(() => {
@@ -80,7 +81,14 @@ const AppWrapper = () => {
             <span className="me-2" style={{ cursor: 'pointer' }} onClick={() => setShowModal(true)}>
               {user?.name || 'User'}
             </span>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#ccc' }}></div>
+            <div style={{ cursor: 'pointer' }} onClick={() => setShowModal(true)}>
+              <Avatar
+                size={32}
+                name={user?.name || 'User'}
+                variant="beam"
+                colors={['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51']}
+              />
+            </div>
           </div>
         </nav>
       )}
@@ -114,6 +122,17 @@ const AppWrapper = () => {
           <Modal.Title>Account</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          <div className="d-flex align-items-center mb-3">
+            <Avatar
+              size={56}
+              name={user?.name || 'User'}
+              variant="beam"
+              colors={['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51']}
+            />
+            <div className="ms-3">
+              <div className="fw-semibold">{user?.name || 'User'}</div>
+            </div>
+          </div>
           <p><strong>Name:</strong> {user?.name}</p>
           <Button variant="danger" onClick={handleLogout}>Logout</Button>
         </Modal.Body>

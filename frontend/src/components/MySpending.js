@@ -35,8 +35,6 @@ const MySpending = ({userId = 1, userName = "User" }) => {
 
   const topCategory = summary.top_category || 'N/A';
   const netOutflow = summary.net_spent?.toFixed(2) || 0.00;
-  const sharedPaid = summary.total_shared_paid?.toFixed(2) || 0.00;
-  const reimbursed = summary.total_reimbursed?.toFixed(2) || 0.00;
 
   const involvedTransactions = transactions;
   const paidTransactions = transactions.filter(txn =>
@@ -113,10 +111,11 @@ const MySpending = ({userId = 1, userName = "User" }) => {
         <div className="tile spending-breakdown-tile">
           <h5 className="fw-semibold">Spending Breakdown</h5>
           <div className="mt-2">
-            <div><strong>Personal Expenses:</strong> ${Number(summary.total_paid).toFixed(2)}</div>
-            <div><strong>Owed to You:</strong> ${Number(summary.total_reimbursed).toFixed(2)}</div>
-            <div><strong>You Owe Others:</strong> ${Number(summary.total_owed).toFixed(2)}</div>
-            <div><strong>You Paid for Others:</strong> ${Number(summary.total_shared_paid).toFixed(2)}</div>
+            <div><strong>Personal Expenses:</strong> ${Number(summary.total_paid || 0).toFixed(2)}</div>
+            <div><strong>Owed to You:</strong> ${Number(summary.total_owed_to_you || 0).toFixed(2)}</div>
+            <div><strong>Already Reimbursed:</strong> ${Number(summary.total_reimbursed || 0).toFixed(2)}</div>
+            <div><strong>You Owe Others:</strong> ${Number(summary.total_owed || 0).toFixed(2)}</div>
+            <div><strong>You Paid for Others:</strong> ${Number(summary.total_shared_paid || 0).toFixed(2)}</div>
           </div>
         </div>
 

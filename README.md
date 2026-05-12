@@ -59,6 +59,12 @@ _Screenshots to be added here_
 ./start.sh
 ```
 
+**Option 1b: Start without ML service**
+```bash
+./start.sh --no-ml
+```
+This starts frontend, backend, and database only. Expense category auto-classification is disabled in this mode.
+
 **Option 2: Using Docker Compose**
 ```bash
 docker-compose up --build
@@ -67,7 +73,7 @@ docker-compose up --build
 The application will be available at:
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5001
-- **ML Service**: http://localhost:5002
+- **ML Service**: http://localhost:5002 (not started when using `./start.sh --no-ml`)
 - **Database**: localhost:5433
 
 ### Managing the Application

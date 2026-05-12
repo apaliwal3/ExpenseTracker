@@ -14,18 +14,31 @@ router.get('/users/:userId/spending', authenticateToken, async (req, res) => {
   try {
     const client = await pool.connect();
 
-    // Summary: personal paid
+    // Summary: personal paid (exclude expenses that are shared)
     const personalRes = await client.query(`
-      SELECT COALESCE(SUM(amount), 0) AS total_paid
-      FROM expenses
-      WHERE user_id = $1
+      SELECT COALESCE(SUM(e.amount), 0) AS total_paid
+      FROM expenses e
+      LEFT JOIN shared_expenses se ON e.id = se.expense_id
+      WHERE e.user_id = $1 AND se.expense_id IS NULL
     `, [userId]);
 
-    // Summary: shared paid
+    // Summary: shared paid (what others owe this user)
     const sharedPaidRes = await client.query(`
       SELECT COALESCE(SUM(amount), 0) AS total_shared_paid
       FROM shared_expenses
       WHERE paid_by = $1
+    `, [userId]);
+
+    // Summary: payer's own share for shared expenses (for expenses the user paid for)
+    const payerOwnRes = await client.query(`
+      SELECT COALESCE(SUM(e.amount - COALESCE(se.total_others, 0)), 0) AS total_payer_own
+      FROM expenses e
+      JOIN (
+        SELECT expense_id, SUM(amount) AS total_others
+        FROM shared_expenses
+        GROUP BY expense_id
+      ) se ON e.id = se.expense_id
+      WHERE e.user_id = $1
     `, [userId]);
 
     // Summary: reimbursed
@@ -33,6 +46,18 @@ router.get('/users/:userId/spending', authenticateToken, async (req, res) => {
       SELECT COALESCE(SUM(amount), 0) AS total_reimbursed
       FROM settled_debts
       WHERE paid_to = $1
+    `, [userId]);
+
+    // Summary: owed to user but not yet settled (outstanding receivables)
+    const owedToYouRes = await client.query(`
+      SELECT COALESCE(SUM(se.amount), 0) AS total_owed_to_you
+      FROM shared_expenses se
+      LEFT JOIN settled_debts sd ON
+        sd.expense_id = se.expense_id AND
+        sd.owed_by = se.owed_by AND
+        sd.paid_to = se.paid_by AND
+        sd.amount = se.amount
+      WHERE se.paid_by = $1 AND sd.id IS NULL
     `, [userId]);
 
     // Summary: owed but not settled
@@ -126,16 +151,24 @@ router.get('/users/:userId/spending', authenticateToken, async (req, res) => {
       settled: txn.settled_flags.every(Boolean),
     }));
 
+    const total_personal = parseFloat(personalRes.rows[0].total_paid);
+    const total_shared_paid = parseFloat(sharedPaidRes.rows[0].total_shared_paid);
+    const total_payer_own = parseFloat(payerOwnRes.rows[0].total_payer_own);
+    const total_reimbursed = parseFloat(reimbursedRes.rows[0].total_reimbursed);
+    const total_owed_to_you = parseFloat(owedToYouRes.rows[0].total_owed_to_you);
+    const total_owed = parseFloat(owedRes.rows[0].total_owed);
+
+    // net_spent: personal (non-shared) + user's own share of shared expenses + amounts user owes - reimbursements
+    const net_spent = total_personal + total_payer_own + total_owed - total_reimbursed;
+
     res.json({
-      total_paid: parseFloat(personalRes.rows[0].total_paid),
-      total_shared_paid: parseFloat(sharedPaidRes.rows[0].total_shared_paid),
-      total_reimbursed: parseFloat(reimbursedRes.rows[0].total_reimbursed),
-      total_owed: parseFloat(owedRes.rows[0].total_owed),
-      net_spent:
-        parseFloat(personalRes.rows[0].total_paid) +
-        parseFloat(sharedPaidRes.rows[0].total_shared_paid) +
-        parseFloat(owedRes.rows[0].total_owed) -
-        parseFloat(reimbursedRes.rows[0].total_reimbursed),
+      total_paid: total_personal,
+      total_shared_paid: total_shared_paid,
+      total_payer_own: total_payer_own,
+      total_reimbursed: total_reimbursed,
+      total_owed_to_you: total_owed_to_you,
+      total_owed: total_owed,
+      net_spent,
       top_category: topCategoryRes.rows[0]?.name || null,
       transactions
     });
@@ -173,16 +206,22 @@ router.get('/users/:userId/spending-trends', authenticateToken, async (req, res)
       DATE_TRUNC('month', e.created_at) AS month_raw,
       SUM(
         CASE
-          WHEN se.owed_by = $1 THEN se.amount  -- User's share of shared expense
-          WHEN e.user_id = $1 AND se.id IS NULL THEN e.amount  -- User's personal expense
+          WHEN se_user.amount IS NOT NULL THEN se_user.amount
+          WHEN e.user_id = $1 AND COALESCE(sagg.total_shared_amount, 0) = 0 THEN e.amount
+          WHEN e.user_id = $1 AND COALESCE(sagg.total_shared_amount, 0) > 0 THEN (e.amount - sagg.total_shared_amount)
           ELSE 0
         END
       ) AS total
     FROM expenses e
     JOIN categories c ON e.category_id = c.id
-    LEFT JOIN shared_expenses se ON e.id = se.expense_id
+    LEFT JOIN shared_expenses se_user ON e.id = se_user.expense_id AND se_user.owed_by = $1
+    LEFT JOIN (
+      SELECT expense_id, SUM(amount) AS total_shared_amount
+      FROM shared_expenses
+      GROUP BY expense_id
+    ) sagg ON e.id = sagg.expense_id
     WHERE 
-      (se.owed_by = $1 OR e.user_id = $1)
+      (se_user.owed_by = $1 OR e.user_id = $1)
       AND e.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months'
     GROUP BY c.name, month, month_raw
     ORDER BY month_raw;
@@ -262,16 +301,22 @@ router.get('/users/:userId/spending-anomalies', authenticateToken, async (req, r
         DATE_TRUNC('month', e.created_at) AS month,
         SUM(
           CASE
-            WHEN se.owed_by = $1 THEN se.amount
-            WHEN e.user_id = $1 AND se.id IS NULL THEN e.amount
+            WHEN se_user.amount IS NOT NULL THEN se_user.amount
+            WHEN e.user_id = $1 AND COALESCE(sagg.total_shared_amount, 0) = 0 THEN e.amount
+            WHEN e.user_id = $1 AND COALESCE(sagg.total_shared_amount, 0) > 0 THEN (e.amount - sagg.total_shared_amount)
             ELSE 0
           END
         ) AS total
       FROM expenses e
       JOIN categories c ON e.category_id = c.id
-      LEFT JOIN shared_expenses se ON e.id = se.expense_id
+      LEFT JOIN shared_expenses se_user ON e.id = se_user.expense_id AND se_user.owed_by = $1
+      LEFT JOIN (
+        SELECT expense_id, SUM(amount) AS total_shared_amount
+        FROM shared_expenses
+        GROUP BY expense_id
+      ) sagg ON e.id = sagg.expense_id
       WHERE e.created_at >= CURRENT_DATE - INTERVAL '6 months'
-        AND (e.user_id = $1 OR se.owed_by = $1)
+        AND (e.user_id = $1 OR se_user.owed_by = $1)
       GROUP BY c.name, DATE_TRUNC('month', e.created_at)
       ORDER BY DATE_TRUNC('month', e.created_at)
     `, [userId]);
@@ -329,15 +374,21 @@ router.get('/users/:userId/category-drift', authenticateToken, async (req, res) 
           c.name AS category,
           DATE_TRUNC('month', e.created_at) AS month,
           CASE
-            WHEN se.owed_by = $1 THEN se.amount
-            WHEN e.user_id = $1 AND se.id IS NULL THEN e.amount
+            WHEN se_user.amount IS NOT NULL THEN se_user.amount
+            WHEN e.user_id = $1 AND COALESCE(sagg.total_shared_amount, 0) = 0 THEN e.amount
+            WHEN e.user_id = $1 AND COALESCE(sagg.total_shared_amount, 0) > 0 THEN (e.amount - sagg.total_shared_amount)
             ELSE 0
           END AS amount
         FROM expenses e
         JOIN categories c ON e.category_id = c.id
-        LEFT JOIN shared_expenses se ON e.id = se.expense_id
+        LEFT JOIN shared_expenses se_user ON e.id = se_user.expense_id AND se_user.owed_by = $1
+        LEFT JOIN (
+          SELECT expense_id, SUM(amount) AS total_shared_amount
+          FROM shared_expenses
+          GROUP BY expense_id
+        ) sagg ON e.id = sagg.expense_id
         WHERE e.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
-          AND (e.user_id = $1 OR se.owed_by = $1)
+          AND (e.user_id = $1 OR se_user.owed_by = $1)
       ),
       this_month AS (
         SELECT category, SUM(amount) AS total

@@ -5,6 +5,27 @@
 
 set -e  # Exit on error
 
+NO_ML=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --no-ml|-n)
+            NO_ML=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: ./start.sh [--no-ml]"
+            echo "  --no-ml, -n   Start app without ml_service"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${NC}"
+            echo "Usage: ./start.sh [--no-ml]"
+            exit 1
+            ;;
+    esac
+done
+
 # Colors for output
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -16,6 +37,10 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  ExpenseTracker Application Startup${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
+
+if [ "$NO_ML" = true ]; then
+    echo -e "${YELLOW}Starting without ML service (--no-ml mode).${NC}"
+fi
 
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
@@ -54,13 +79,24 @@ docker-compose down 2>/dev/null || true
 # echo -e "${YELLOW}Removing old containers...${NC}"
 # docker-compose rm -f
 
-# Build all services
-echo -e "${BLUE}Building Docker images...${NC}"
-docker-compose build --no-cache
+# Build services
+if [ "$NO_ML" = true ]; then
+    SERVICES=(postgres backend frontend)
+else
+    SERVICES=(postgres backend frontend ml_service)
+fi
 
-# Start all services
-echo -e "${BLUE}Starting all services...${NC}"
-docker-compose up -d
+echo -e "${BLUE}Building Docker images...${NC}"
+docker-compose build --no-cache "${SERVICES[@]}"
+
+# Start services
+echo -e "${BLUE}Starting services...${NC}"
+if [ "$NO_ML" = true ]; then
+    # Use --no-deps so backend does not auto-start ml_service via depends_on.
+    docker-compose up -d --no-deps "${SERVICES[@]}"
+else
+    docker-compose up -d "${SERVICES[@]}"
+fi
 
 # Wait for services to be ready
 echo -e "${YELLOW}Waiting for services to start...${NC}"
@@ -69,7 +105,7 @@ sleep 5
 # Check if containers are running
 echo ""
 echo -e "${BLUE}Checking service status...${NC}"
-docker-compose ps
+docker-compose ps "${SERVICES[@]}"
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
@@ -79,9 +115,16 @@ echo ""
 echo -e "${GREEN}Services available at:${NC}"
 echo -e "  ${BLUE}Frontend:${NC}     http://localhost:3000"
 echo -e "  ${BLUE}Backend API:${NC}  http://localhost:5001"
-echo -e "  ${BLUE}ML Service:${NC}   http://localhost:5002"
+if [ "$NO_ML" = true ]; then
+    echo -e "  ${YELLOW}ML Service:${NC}   disabled"
+else
+    echo -e "  ${BLUE}ML Service:${NC}   http://localhost:5002"
+fi
 echo -e "  ${BLUE}Database:${NC}     localhost:5433"
 echo ""
+if [ "$NO_ML" = true ]; then
+    echo -e "${YELLOW}Note:${NC} Category auto-classification is unavailable while ML service is disabled."
+fi
 echo -e "${YELLOW}To view logs:${NC}          docker-compose logs -f"
 echo -e "${YELLOW}To view specific logs:${NC} docker-compose logs -f [service-name]"
 echo -e "${YELLOW}To stop all services:${NC} docker-compose down"
